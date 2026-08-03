@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bildschirm-Pause 🌿 | amica mea</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #FDF6F0; -webkit-font-smoothing: antialiased; }
+    @keyframes bar { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+
+const BRAND = {
+  brown: "#3E2D28",
+  brick: "#C43A2A",
+  orange: "#D4742C",
+  cream: "#FDF6F0",
+  creamDark: "#F5EAE0",
+  warmGray: "#B8A99A",
+  softPink: "#E8D5CC",
+  white: "#FFFFFF",
+};
+
+const exercises = [
+  { id: 1, title: "Sanfte Welle", duration: 30, instruction: "Lass deinen Kopf langsam von einer Schulter zur anderen kreisen. Nicht in den Nacken legen, sondern vorne herum. Ganz sanft und ohne Druck.", reps: "10×" },
+  { id: 2, title: "Seitenneigung", duration: 30, instruction: "Neige dein Ohr Richtung Schulter. Die Hand auf der anderen Seite zieht sanft nach unten, sodass du die Dehnung seitlich im Nacken spürst.", reps: "20 Sek. pro Seite" },
+  { id: 3, title: "Kinn zur Brust", duration: 20, instruction: "Lass dein Kinn langsam zur Brust sinken. Spüre die Dehnung im Nacken. Richte dich Wirbel für Wirbel wieder auf.", reps: "5× langsam" },
+  { id: 4, title: "Doppelkinn", duration: 20, instruction: "Schiebe dein Kinn gerade nach hinten, als würdest du ein Doppelkinn machen. Dabei richtet sich deine Halswirbelsäule auf.", reps: "8× halten für 3 Sek." },
+  { id: 5, title: "Doppelkinn-Nicken", duration: 20, instruction: "Schiebe dein Kinn nach hinten ins Doppelkinn und richte die Halswirbelsäule auf. Aus dieser Position machst du kleine, langsame Nickbewegungen.", reps: "6×" },
+  { id: 6, title: "Kopf neigen", duration: 25, instruction: "Kinn nach hinten ins Doppelkinn schieben. Aus dieser aufgerichteten Position den Kopf langsam nach links und rechts neigen, im Wechsel.", reps: "6× pro Seite" },
+  { id: 7, title: "Schildkröte", duration: 20, instruction: "Zieh dein Kinn rein und mach den Nacken lang. Dann schiebe dein Kinn nach vorne raus, wie eine Schildkröte aus ihrem Panzer. Wieder reinholen, Nacken lang ziehen.", reps: "6×" },
+  { id: 8, title: "Diagonale Dehnung", duration: 30, instruction: "Dreh deinen Kopf leicht zur Seite und neige das Kinn Richtung Achsel. Spüre die Dehnung schräg im Nacken.", reps: "20 Sek. pro Seite" },
+  { id: 9, title: "Nackenkräftigung", duration: 25, instruction: "Drücke deine Hand seitlich gegen den Kopf. Dein Kopf hält dagegen — ohne sich zu bewegen. Baut Kraft auf und stabilisiert den Nacken.", reps: "5 Sek. halten, 4× pro Seite" },
+  { id: 10, title: "Große Kreise", duration: 25, instruction: "Kreise beide Schultern gleichzeitig — erst nach hinten, dann nach vorn. Schön groß und langsam.", reps: "6–8× pro Richtung" },
+  { id: 11, title: "Fallenlassen", duration: 20, instruction: "Zieh beide Schultern so hoch wie möglich Richtung Ohren. 5 Sekunden halten — dann einfach fallen lassen. Die Entspannung kommt sofort.", reps: "6–8×" },
+  { id: 12, title: "Brustöffner", duration: 25, instruction: "Verschränke deine Arme hinter dem Rücken, zieh die Schulterblätter zusammen und nach unten. Versuche dabei, die Arme etwas anzuheben. Brust raus, Blick geradeaus.", reps: "6–8×" },
+  { id: 13, title: "Türrahmen-Stretch", duration: 30, instruction: "Stell dich in einen Türrahmen. Lege deine Unterarme rechts und links an den Rahmen, Ellenbogen ungefähr rechtwinklig gebeugt. Lehn dich sanft nach vorn und spüre, wie sich die ganze Brustmuskulatur öffnet.", reps: "20 Sek. halten, 2×" },
+  { id: 14, title: "Flügelöffner", duration: 25, instruction: "Fingerspitzen zeigen nach vorne, Ellenbogen rechtwinklig gebeugt. Führe deine Unterarme langsam in die Waagerechte neben den Körper und zieh dabei die Schulterblätter nach unten und zusammen. Gerade die letzten Zentimeter bewusst ziehen — da passiert am meisten.", reps: "6–8×" },
+  { id: 15, title: "Langer Arm", duration: 25, instruction: "Unterarme waagerecht neben den Körper positionieren, oberer Rücken aktiviert. Jetzt die Arme langstrecken, Handflächen zeigen nach vorne. Ellenbogen wieder an den Rippenbogen führen und erneut strecken.", reps: "6–8×" },
+  { id: 16, title: "Springen lassen", duration: 30, instruction: "Lass deine Arme locker hängen. Gib aus den Knien kleine, federnde Impulse und lass deine Schultern einfach mitspringen. Locker, locker, locker.", reps: "30 Sek." },
+  { id: 17, title: "Löwenmäulchen", duration: 20, instruction: "Öffne deinen Mund so weit es geht — sanft! Halte kurz, schließe langsam. Löst die gesamte Kiefermuskulatur.", reps: "5× langsam" },
+  { id: 18, title: "Kieferpendel", duration: 20, instruction: "Schiebe deinen Unterkiefer langsam nach rechts, dann nach links. Spüre, wie sich die Kiefergelenke mobilisieren.", reps: "8× pro Seite" },
+  { id: 19, title: "Kaumuskel-Massage", duration: 30, instruction: "Lege deine Fingerspitzen auf die Kaumuskeln seitlich am Kiefer und massiere in kleinen Kreisen. Löst Spannung vom Zähnepressen und nächtlichem Knirschen.", reps: "30 Sek. kreisen" },
+  { id: 20, title: "Luftballon", duration: 15, instruction: "Blas deine Wangen auf und schiebe die Luft von einer Seite zur anderen. Lockert das ganze Gesicht.", reps: "10× hin und her" },
+  { id: 21, title: "Stille Puste", duration: 20, instruction: "Puste deine Wangen auf, aber achte darauf: Die Zähne bleiben dabei einen Millimeter auseinander. Nicht aufeinanderbeißen! Halte die Spannung und spüre, wie der Kiefer loslässt.", reps: "6–8×" },
+  { id: 22, title: "Zungenkarussell", duration: 20, instruction: "Fahre mit der Zunge kreisförmig über deine Schneidezähne, von innen und außen. Schiebe dabei ruhig die Wangen von innen nach außen. Löst den Zungengrund, der oft sehr verspannt ist.", reps: "5× pro Richtung" },
+  { id: 23, title: "Weiter Blick", duration: 20, instruction: "Schau aus dem Fenster oder auf den fernsten Punkt im Raum. Lass deine Augen dort ruhen und entspannen.", reps: "20 Sek." },
+  { id: 24, title: "Augäpfel kreisen", duration: 20, instruction: "Kreise mit deinen Augäpfeln: erst rechtsherum, dann linksherum. Der Kopf bleibt dabei ruhig, nur die Augen bewegen sich.", reps: "5× pro Richtung" },
+  { id: 25, title: "Power-Blinzeln", duration: 15, instruction: "Blinzle 20× schnell hintereinander. Befeuchtet die Augen und löst die Anspannung vom Starren auf den Bildschirm.", reps: "20× schnell" },
+  { id: 26, title: "Nah-Fern-Wechsel", duration: 25, instruction: "Halte deinen Finger 20 cm vor die Nase und fokussiere ihn. Dann schau in die Ferne. Wechsle langsam hin und her.", reps: "8× wechseln" },
+  { id: 27, title: "Augen-Espresso", duration: 15, instruction: "Kneife deine Augen fest zusammen — halte 3 Sekunden — dann öffne sie weit. Erfrischt sofort, wie ein kleiner Espresso für die Augen.", reps: "5×" },
+  { id: 28, title: "Palming", duration: 30, instruction: "Reibe deine Handflächen warm und lege sie sanft auf deine geschlossenen Augen. Genieße die Dunkelheit und Wärme.", reps: "30 Sek. genießen" },
+  { id: 29, title: "Regenbogen", duration: 20, instruction: "Schließe deine Augen. Schaue hinter den geschlossenen Lidern langsam von links nach rechts und wieder zurück, als würdest du einen Regenbogen nachzeichnen.", reps: "6–8×" },
+  { id: 30, title: "Stirn & Brauen lösen", duration: 25, instruction: "Lege beide Hände an die Nasenwurzel und massiere mit den Fingerspitzen entlang der Augenbrauen nach außen. Dann streiche die Stirn von innen nach außen aus, mit kräftigen Strichen.", reps: "5–8×" },
+  { id: 31, title: "Federn", duration: 30, instruction: "Stell dich hin und federe locker von einem Bein aufs andere. Lass den ganzen Körper mitschwingen. Regt die Lymphe an und bringt den Kreislauf in Schwung.", reps: "30 Sek." },
+  { id: 32, title: "Hände schütteln", duration: 60, instruction: "Beuge deine Ellenbogen an und schüttle deine Hände kräftig hin und her. Richtig ausschütteln! Gerade nach viel Tippen an der Tastatur eine Wohltat.", reps: "1 Min." },
+  { id: 33, title: "Kraftgriff", duration: 20, instruction: "Greife mit beiden Händen richtig fest zu, als würdest du etwas zusammendrücken. Dann loslassen. Kräftigt die Unterarme und löst die Fingerspannung.", reps: "10–15×" },
+  { id: 34, title: "Faust-Kreise", duration: 20, instruction: "Balle beide Hände zur Faust und kreise deine Handgelenke. Langsam und bewusst.", reps: "6–8× pro Richtung" },
+  { id: 35, title: "Offene-Hand-Kreise", duration: 20, instruction: "Spreize deine Finger weit und kreise deine Handgelenke mit offener Hand.", reps: "6–8× pro Richtung" },
+  { id: 36, title: "Handgelenk-Acht", duration: 20, instruction: "Kreise deine Handgelenke in einer liegenden Acht. Mobilisiert die Gelenke in alle Richtungen.", reps: "6–8×" },
+  { id: 37, title: "Ellenbogen-Kreise", duration: 20, instruction: "Beuge deine Ellenbogen und kreise die Unterarme.", reps: "6–8× pro Richtung" },
+  { id: 38, title: "Ellenbogen-Acht", duration: 20, instruction: "Beuge deine Ellenbogen und kreise die Unterarme in einer liegenden Acht.", reps: "6–8× pro Richtung" },
+  { id: 39, title: "Armkreise frontal", duration: 25, instruction: "Strecke deinen Arm nach vorne, balle die Faust und kreise den ganzen Arm vor dem Körper. Kleine, kontrollierte Kreise.", reps: "6–8× pro Richtung, beide Arme" },
+  { id: 40, title: "Armkreise seitlich", duration: 25, instruction: "Strecke deinen Arm zur Seite, Faust geballt, und kreise an der Körperseite.", reps: "6–8× pro Richtung, beide Arme" },
+  { id: 41, title: "Armkreise hinterrücks", duration: 25, instruction: "Strecke deinen Arm nach hinten, Faust geballt, und kreise hinter dem Körper.", reps: "6–8× pro Richtung, beide Arme" },
+  { id: 42, title: "Liegende Acht frontal", duration: 25, instruction: "Strecke deinen Arm nach vorne und zeichne mit der Faust eine liegende Acht in die Luft.", reps: "6–8× pro Richtung, beide Arme" },
+  { id: 43, title: "Liegende Acht seitlich", duration: 25, instruction: "Strecke deinen Arm zur Seite und zeichne eine liegende Acht in die Luft.", reps: "6–8× pro Richtung, beide Arme" },
+  { id: 44, title: "Liegende Acht hinterrücks", duration: 25, instruction: "Strecke deinen Arm nach hinten und zeichne eine liegende Acht in die Luft.", reps: "6–8× pro Richtung, beide Arme" },
+];
+
+const soundOptions = [
+  { id: "gong", name: "Gong", emoji: "🔔", desc: "Klar und rund" },
+  { id: "glockenspiel", name: "Glockenspiel", emoji: "🎐", desc: "Drei klare Töne" },
+  { id: "doppelton", name: "Sanfter Doppelton", emoji: "🎵", desc: "Weich und freundlich" },
+  { id: "windspiel", name: "Windspiel", emoji: "🌬️", desc: "Hohe perlende Töne" },
+  { id: "naturton", name: "Naturton", emoji: "🕉️", desc: "Tief und erdend" },
+  { id: "vogel", name: "Vogelzwitschern", emoji: "🐦", desc: "Fröhlich und kurz" },
+];
+
+// Persistent audio context — initialized on user tap, kept alive for background playback
+let sharedAudioCtx = null;
+
+function ensureAudioContext() {
+  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+    sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume();
+  }
+  return sharedAudioCtx;
+}
+
+// Keep audio context alive by playing silent tone every 20 seconds
+function startSilentKeepAlive() {
+  if (window._keepAliveInterval) return;
+  window._keepAliveInterval = setInterval(() => {
+    try {
+      const ctx = ensureAudioContext();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.001, ctx.currentTime);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.01);
+    } catch(e) {}
+  }, 20000);
+}
+
+function stopSilentKeepAlive() {
+  if (window._keepAliveInterval) {
+    clearInterval(window._keepAliveInterval);
+    window._keepAliveInterval = null;
+  }
+}
+
+function playSound(type) {
+  try {
+    const ctx = ensureAudioContext();
+    const t = ctx.currentTime;
+    if (type === "gong") {
+      const att = ctx.createOscillator(); const ag = ctx.createGain();
+      att.type = "square"; att.frequency.setValueAtTime(800, t);
+      att.frequency.exponentialRampToValueAtTime(220, t + 0.04);
+      ag.gain.setValueAtTime(0.6, t); ag.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      att.connect(ag); ag.connect(ctx.destination); att.start(t); att.stop(t + 0.06);
+      const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
+      o1.type = "sine"; o1.frequency.setValueAtTime(220, t);
+      g1.gain.setValueAtTime(0.6, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 3.5);
+      o1.connect(g1); g1.connect(ctx.destination); o1.start(t); o1.stop(t + 3.5);
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+      o2.type = "sine"; o2.frequency.setValueAtTime(440, t);
+      g2.gain.setValueAtTime(0.35, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
+      o2.connect(g2); g2.connect(ctx.destination); o2.start(t); o2.stop(t + 2.5);
+      const o3 = ctx.createOscillator(); const g3 = ctx.createGain();
+      o3.type = "sine"; o3.frequency.setValueAtTime(660, t);
+      g3.gain.setValueAtTime(0.12, t); g3.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+      o3.connect(g3); g3.connect(ctx.destination); o3.start(t); o3.stop(t + 1.5);
+    }
+    if (type === "glockenspiel") {
+      [523, 659, 784].forEach((freq, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(freq, t + i * 0.2);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.3, t + i * 0.2);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 1.2);
+        o.connect(g); g.connect(ctx.destination); o.start(t + i * 0.2); o.stop(t + i * 0.2 + 1.2);
+      });
+    }
+    if (type === "doppelton") {
+      [440, 554].forEach((freq, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(freq, t + i * 0.4);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.2, t + i * 0.4 + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.4 + 1.5);
+        o.connect(g); g.connect(ctx.destination); o.start(t + i * 0.4); o.stop(t + i * 0.4 + 1.5);
+      });
+    }
+    if (type === "windspiel") {
+      [1047, 1175, 1319, 1397, 1568].forEach((freq, i) => {
+        const delay = i * 0.15 + Math.random() * 0.1;
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(freq, t + delay);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + delay + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.8);
+        o.connect(g); g.connect(ctx.destination); o.start(t + delay); o.stop(t + delay + 0.8);
+      });
+    }
+    if (type === "naturton") {
+      const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
+      o1.type = "sine"; o1.frequency.setValueAtTime(174, t);
+      o1.frequency.exponentialRampToValueAtTime(220, t + 3);
+      g1.gain.setValueAtTime(0.2, t); g1.gain.linearRampToValueAtTime(0.25, t + 0.5);
+      g1.gain.exponentialRampToValueAtTime(0.001, t + 3);
+      o1.connect(g1); g1.connect(ctx.destination); o1.start(t); o1.stop(t + 3);
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+      o2.type = "sine"; o2.frequency.setValueAtTime(348, t);
+      o2.frequency.exponentialRampToValueAtTime(440, t + 3);
+      g2.gain.setValueAtTime(0.06, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
+      o2.connect(g2); g2.connect(ctx.destination); o2.start(t); o2.stop(t + 2.5);
+    }
+    if (type === "vogel") {
+      const chirp = (freq, start, dur) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(freq, t + start);
+        o.frequency.exponentialRampToValueAtTime(freq * 1.3, t + start + dur * 0.3);
+        o.frequency.exponentialRampToValueAtTime(freq * 0.9, t + start + dur);
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.2, t + start + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
+        o.connect(g); g.connect(ctx.destination); o.start(t + start); o.stop(t + start + dur);
+      };
+      chirp(2200, 0, 0.15); chirp(2600, 0.18, 0.12);
+      chirp(2200, 0.5, 0.15); chirp(2600, 0.68, 0.12);
+    }
+  } catch (e) {}
+}
+
+function getRandomExercises(count) {
+  const shuffled = [...exercises].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function formatTime(s) {
+  return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
+}
+
+// ─── SETUP STEPS ───────────────────────────────────────
+
+function StepIntro({ onNext }) {
+  return (
+    <div style={{ textAlign: "center", padding: "30px 0 0" }}>
+      <div style={{
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontSize: "32px", fontWeight: 700, letterSpacing: "1px", lineHeight: 1.2,
+      }}><span style={{ color: BRAND.brown }}>amica </span><span style={{ color: BRAND.brick }}>mea</span></div>
+      <div style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "11px", letterSpacing: "2.5px", color: BRAND.brown,
+        textTransform: "uppercase", marginTop: "3px",
+      }}>das Fitnessloft für Frauen</div>
+      <div style={{
+        width: "40px", height: "3px",
+        background: BRAND.brown,
+        margin: "18px auto", borderRadius: "2px",
+      }} />
+      <div style={{ fontSize: "36px", marginBottom: "8px" }}>🌿</div>
+      <h1 style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "26px", fontWeight: 600, color: BRAND.brown,
+        margin: "0 0 20px", lineHeight: 1.3,
+      }}>Bildschirm-Pause</h1>
+      <p style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "17px", color: BRAND.brown, lineHeight: 1.7,
+        margin: "0 0 32px", padding: "0 4px",
+      }}>
+        Langes Sitzen lässt Nacken, Schultern und Kiefer verspannen! Und oft merkst du es nicht einmal. Dieser kleine Timer hilft dir, ein Gespür dafür zu entwickeln, wann dein Körper eine Pause braucht und welche Muskelgruppen sich nach Entspannung sehnen.
+      </p>
+      <button onClick={onNext} style={{
+        fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: 600,
+        color: BRAND.white, background: BRAND.orange,
+        border: "none", borderRadius: "16px", padding: "16px 48px", cursor: "pointer",
+        boxShadow: `0 6px 20px ${BRAND.orange}35`,
+      }}>Weiter</button>
+    </div>
+  );
+}
+
+function StepHowItWorks({ onNext, onBack }) {
+  return (
+    <div style={{ padding: "30px 0 0" }}>
+      <h2 style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "24px", fontWeight: 600, color: BRAND.brown,
+        textAlign: "center", margin: "0 0 20px",
+      }}>So funktioniert es:</h2>
+      <div style={{
+        background: BRAND.white, borderRadius: "16px", padding: "22px",
+        border: `1px solid ${BRAND.creamDark}`,
+      }}>
+        <p style={{
+          fontFamily: "'Poppins', sans-serif",
+          fontSize: "17px", color: BRAND.brown, lineHeight: 1.7,
+          margin: 0,
+        }}>
+          Stell deinen Intervall und die Anzahl der Übungen pro Pause ein. Der Timer zeigt dir dann jedes Mal Evas Lieblingsübungen für Nacken, Schultern, Kiefer und Augen — direkt am Schreibtisch, ohne Matte, ohne Geräte.
+        </p>
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "32px" }}>
+        <button onClick={onBack} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "15px", fontWeight: 500,
+          color: BRAND.brown, background: BRAND.white,
+          border: `1.5px solid ${BRAND.creamDark}`, borderRadius: "14px",
+          padding: "14px 28px", cursor: "pointer",
+        }}>Zurück</button>
+        <button onClick={onNext} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "15px", fontWeight: 600,
+          color: BRAND.white, background: BRAND.orange,
+          border: "none", borderRadius: "14px", padding: "14px 28px", cursor: "pointer",
+          boxShadow: `0 4px 15px ${BRAND.orange}30`,
+        }}>Weiter</button>
+      </div>
+    </div>
+  );
+}
+
+function StepSound({ sound, setSound, onNext, onBack }) {
+  const [playingId, setPlayingId] = useState(null);
+  const handlePlay = (id) => { setPlayingId(id); playSound(id); setTimeout(() => setPlayingId(null), 3000); };
+  return (
+    <div style={{ padding: "30px 0 0" }}>
+      <h2 style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "22px", fontWeight: 600, color: BRAND.brown,
+        textAlign: "center", margin: "0 0 8px",
+      }}>Wähle deinen Pausenklang:</h2>
+      <p style={{
+        fontFamily: "'Poppins', sans-serif", fontSize: "15px", color: BRAND.warmGray,
+        textAlign: "center", margin: "0 0 20px",
+      }}>Tippe an zum Anhören</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        {soundOptions.map((s) => {
+          const active = sound === s.id;
+          const isPlaying = playingId === s.id;
+          return (
+            <button key={s.id} onClick={() => { setSound(s.id); handlePlay(s.id); }}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "6px",
+                background: active ? `${BRAND.orange}0C` : BRAND.white,
+                border: active ? `2px solid ${BRAND.orange}` : `1px solid ${BRAND.creamDark}`,
+                borderRadius: "16px", padding: "16px 10px", cursor: "pointer",
+                transition: "all 0.2s ease", position: "relative",
+                boxShadow: active ? `0 3px 12px ${BRAND.orange}20` : "none",
+              }}>
+              <div style={{ fontSize: "28px", marginBottom: "2px" }}>
+                {isPlaying ? (
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "28px", justifyContent: "center" }}>
+                    {[10, 18, 14, 20, 12].map((h, i) => (
+                      <div key={i} style={{ width: "3px", borderRadius: "2px", background: BRAND.orange, animation: `bar 0.4s ease-in-out ${i * 0.08}s infinite alternate`, height: `${h}px` }} />
+                    ))}
+                  </div>
+                ) : s.emoji}
+              </div>
+              <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "14px", fontWeight: active ? 600 : 400, color: BRAND.brown }}>{s.name}</div>
+              <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "11px", color: BRAND.warmGray }}>{s.desc}</div>
+              {active && (
+                <div style={{ position: "absolute", top: "8px", right: "10px", width: "20px", height: "20px", background: BRAND.orange, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", color: BRAND.white }}>✓</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "28px" }}>
+        <button onClick={onBack} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "15px", fontWeight: 500,
+          color: BRAND.brown, background: BRAND.white,
+          border: `1.5px solid ${BRAND.creamDark}`, borderRadius: "14px",
+          padding: "14px 28px", cursor: "pointer",
+        }}>Zurück</button>
+        <button onClick={onNext} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "15px", fontWeight: 600,
+          color: BRAND.white, background: BRAND.orange,
+          border: "none", borderRadius: "14px", padding: "14px 28px", cursor: "pointer",
+          boxShadow: `0 4px 15px ${BRAND.orange}30`,
+        }}>Weiter</button>
+      </div>
+    </div>
+  );
+}
+
+function StepSettings({ interval, setInterval_, exerciseCount, setExerciseCount, onStart, onBack }) {
+  const intervals = [{ value: 30, label: "30 Min" }, { value: 45, label: "45 Min" }, { value: 60, label: "60 Min" }];
+  const counts = [1, 2, 3];
+  const chip = (active) => ({
+    fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: active ? 600 : 400,
+    color: active ? BRAND.white : BRAND.brown,
+    background: active ? BRAND.orange : BRAND.white,
+    border: active ? "none" : `1.5px solid ${BRAND.creamDark}`,
+    borderRadius: "14px", padding: "14px 20px", cursor: "pointer",
+    transition: "all 0.2s ease", boxShadow: active ? `0 3px 12px ${BRAND.orange}30` : "none",
+    flex: 1, textAlign: "center",
+  });
+  const pauseMin = Math.max(1, Math.round((exerciseCount * 25) / 60));
+  const dailyMin = Math.round((480 / interval) * exerciseCount * 25 / 60);
+
+  return (
+    <div style={{ padding: "30px 0 0" }}>
+      <h2 style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: "24px", fontWeight: 600, color: BRAND.brown,
+        textAlign: "center", margin: "0 0 28px",
+      }}>Stelle deinen Timer ein:</h2>
+
+      <div style={{ marginBottom: "28px" }}>
+        <div style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: 600,
+          color: BRAND.brown, marginBottom: "12px", textAlign: "center",
+        }}>Pause alle</div>
+        <div style={{ display: "flex", gap: "10px" }}>
+          {intervals.map((i) => <button key={i.value} onClick={() => setInterval_(i.value)} style={chip(interval === i.value)}>{i.label}</button>)}
+        </div>
+      </div>
+      <div style={{ marginBottom: "28px" }}>
+        <div style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: 600,
+          color: BRAND.brown, marginBottom: "12px", textAlign: "center",
+        }}>Übungen pro Pause</div>
+        <div style={{ display: "flex", gap: "10px", maxWidth: "260px", margin: "0 auto" }}>
+          {counts.map((c) => <button key={c} onClick={() => setExerciseCount(c)} style={chip(exerciseCount === c)}>{c}</button>)}
+        </div>
+      </div>
+      <div style={{ background: BRAND.white, borderRadius: "14px", padding: "16px 20px", marginBottom: "28px", border: `1px solid ${BRAND.creamDark}`, textAlign: "center" }}>
+        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: "15px", color: BRAND.brown }}>
+          ca. {pauseMin} Min. Pause alle {interval} Min.
+        </span>
+        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: "14px", color: BRAND.warmGray, display: "block", marginTop: "4px" }}>
+          bei 8 Std. Arbeit ≈ {dailyMin} Min. Bewegung am Tag
+        </span>
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+        <button onClick={onBack} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "15px", fontWeight: 500,
+          color: BRAND.brown, background: BRAND.white,
+          border: `1.5px solid ${BRAND.creamDark}`, borderRadius: "14px",
+          padding: "14px 28px", cursor: "pointer",
+        }}>Zurück</button>
+        <button onClick={onStart} style={{
+          fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: 600,
+          color: BRAND.white, background: BRAND.orange,
+          border: "none", borderRadius: "16px", padding: "16px 36px", cursor: "pointer",
+          boxShadow: `0 6px 20px ${BRAND.orange}35`,
+        }}>Timer starten</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── TIMER COMPONENTS ──────────────────────────────────
+
+function CircleTimer({ seconds, total, isPause }) {
+  const r = 100; const c = 2 * Math.PI * r;
+  const p = total > 0 ? (seconds / total) * c : c;
+  return (
+    <div style={{ position: "relative", width: "240px", height: "240px", margin: "0 auto" }}>
+      <svg width="240" height="240" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r={r} fill="none" stroke={BRAND.creamDark} strokeWidth="8" />
+        <circle cx="120" cy="120" r={r} fill="none" stroke={BRAND.orange}
+          strokeWidth="8" strokeDasharray={c} strokeDashoffset={c - p} strokeLinecap="round"
+          transform="rotate(-90 120 120)" style={{ transition: "stroke-dashoffset 1s linear, stroke 0.3s ease" }} />
+      </svg>
+      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+        <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "44px", fontWeight: 300, color: BRAND.brown, lineHeight: 1 }}>{formatTime(seconds)}</div>
+        <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "13px", color: BRAND.warmGray, marginTop: "6px", letterSpacing: "1px", textTransform: "uppercase" }}>
+          {isPause ? "Pause — beweg dich!" : "Arbeitszeit"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExerciseCard({ exercise, isActive, isSingle }) {
+  return (
+    <div style={{
+      background: BRAND.white, borderRadius: "16px", padding: "18px", marginBottom: "10px",
+      boxShadow: isActive ? `0 4px 20px ${BRAND.softPink}` : "0 1px 4px rgba(0,0,0,0.05)",
+      border: isActive ? `2px solid ${BRAND.orange}` : `1px solid ${BRAND.creamDark}`,
+      transition: "all 0.3s ease", opacity: isActive || isSingle ? 1 : 0.6,
+      transform: isActive || isSingle ? "scale(1)" : "scale(0.97)",
+    }}>
+      <div style={{ marginBottom: "6px" }}>
+        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: "16px", fontWeight: 600, color: BRAND.brown }}>{exercise.title}</span>
+      </div>
+      <p style={{ fontFamily: "'Poppins', sans-serif", fontSize: "15px", color: "#6B5B52", margin: "0 0 8px", lineHeight: 1.6 }}>{exercise.instruction}</p>
+      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: "13px", color: BRAND.orange, fontWeight: 500 }}>{exercise.reps}</span>
+    </div>
+  );
+}
+
+// ─── MAIN APP ──────────────────────────────────────────
+
+function App() {
+  const [setupStep, setSetupStep] = useState(0);
+  const [state, setState] = useState("setup");
+  const [interval, setIntervalVal] = useState(45);
+  const [exerciseCount, setExerciseCount] = useState(2);
+  const [sound, setSound] = useState("glockenspiel");
+  const [seconds, setSeconds] = useState(0);
+  const [currentExercises, setCurrentExercises] = useState([]);
+  const [activeExercise, setActiveExercise] = useState(0);
+  const [exerciseSeconds, setExerciseSeconds] = useState(0);
+  const [pauseCount, setPauseCount] = useState(0);
+  const timerRef = useRef(null);
+  const exTimerRef = useRef(null);
+  const wakeLockRef = useRef(null);
+
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      }
+    } catch (e) {}
+  };
+
+  const releaseWakeLock = () => {
+    try {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
+    } catch (e) {}
+  };
+
+  // Re-acquire wake lock when tab becomes visible again
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && (state === 'working' || state === 'pausing')) {
+        requestWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [state]);
+
+  const workDur = interval * 60;
+  const pauseDur = exerciseCount * 30;
+
+  const startWork = useCallback(() => {
+    setState("working"); setSeconds(workDur); setCurrentExercises([]);
+  }, [workDur]);
+
+  const startPause = useCallback(() => {
+    playSound(sound);
+    const ex = getRandomExercises(exerciseCount);
+    setCurrentExercises(ex); setActiveExercise(0); setExerciseSeconds(ex[0].duration);
+    setState("pausing"); setSeconds(pauseDur); setPauseCount((c) => c + 1);
+  }, [exerciseCount, pauseDur, sound]);
+
+  const handleStart = useCallback(() => {
+    ensureAudioContext();
+    startSilentKeepAlive();
+    setPauseCount(0); setState("working"); setSeconds(workDur);
+    requestWakeLock();
+  }, [workDur]);
+
+  const reset = useCallback(() => {
+    setState("setup"); setSetupStep(0); setSeconds(0); setCurrentExercises([]); setPauseCount(0);
+    clearInterval(timerRef.current); clearInterval(exTimerRef.current);
+    stopSilentKeepAlive();
+    releaseWakeLock();
+  }, []);
+
+  useEffect(() => {
+    if (state !== "working") return;
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setSeconds((s) => {
+        if (s <= 1) {
+          setTimeout(() => startPause(), 0);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [state, startPause]);
+
+  const isPause = state === "pausing";
+  const total = isPause ? pauseDur : workDur;
+  const btn = (primary) => ({
+    fontFamily: "'Poppins', sans-serif", fontSize: "14px", fontWeight: 500,
+    color: primary ? BRAND.white : BRAND.brown,
+    background: primary ? BRAND.orange : BRAND.white,
+    border: primary ? "none" : `1.5px solid ${BRAND.creamDark}`,
+    borderRadius: "14px", padding: "12px 24px", cursor: "pointer",
+    boxShadow: primary ? `0 3px 12px ${BRAND.orange}30` : "none",
+  });
+
+  return (
+    <div style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${BRAND.cream} 0%, ${BRAND.creamDark} 100%)`, fontFamily: "'Poppins', sans-serif", maxWidth: "420px", margin: "0 auto", padding: "0 20px 40px" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+      <style>{`@keyframes bar { from { transform: scaleY(0.4); } to { transform: scaleY(1); } }`}</style>
+
+      {/* SETUP FLOW */}
+      {state === "setup" && setupStep === 0 && <StepIntro onNext={() => setSetupStep(1)} />}
+      {state === "setup" && setupStep === 1 && <StepHowItWorks onNext={() => setSetupStep(2)} onBack={() => setSetupStep(0)} />}
+      {state === "setup" && setupStep === 2 && <StepSound sound={sound} setSound={setSound} onNext={() => setSetupStep(3)} onBack={() => setSetupStep(1)} />}
+      {state === "setup" && setupStep === 3 && <StepSettings interval={interval} setInterval_={setIntervalVal} exerciseCount={exerciseCount} setExerciseCount={setExerciseCount} onStart={handleStart} onBack={() => setSetupStep(2)} />}
+
+      {/* TIMER */}
+      {(state === "working" || state === "pausing") && (
+        <>
+          <div style={{ padding: "16px 0 0", textAlign: "center" }}>
+            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "22px", fontWeight: 700 }}><span style={{ color: BRAND.brown }}>amica </span><span style={{ color: BRAND.brick }}>mea</span></div>
+            <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "9px", letterSpacing: "2px", color: BRAND.orange, textTransform: "uppercase", marginTop: "2px" }}>Bildschirm-Pause</div>
+          </div>
+
+          <div style={{ textAlign: "center", margin: "12px 0 16px" }}>
+            <span style={{
+              display: "inline-block", background: isPause ? `${BRAND.orange}18` : `${BRAND.orange}18`,
+              color: BRAND.orange,
+              fontFamily: "'Poppins', sans-serif", fontSize: "13px", fontWeight: 500, padding: "5px 16px", borderRadius: "20px",
+            }}>{pauseCount > 0 ? `${pauseCount}. Pause heute` : "Dein Timer läuft"}</span>
+          </div>
+
+          {state === "working" && <CircleTimer seconds={seconds} total={total} isPause={false} />}
+
+          {state === "working" && (
+            <div style={{ textAlign: "center", marginTop: "24px" }}>
+              <p style={{ fontFamily: "'Poppins', sans-serif", fontSize: "15px", color: "#6B5B52", margin: "0 0 20px" }}>
+                Arbeite konzentriert weiter. Ich sage dir, wann es Zeit für deine nächste Pause ist.
+              </p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                <button onClick={startPause} style={btn(true)}>Pause jetzt!</button>
+                <button onClick={reset} style={btn(false)}>Beenden!</button>
+              </div>
+            </div>
+          )}
+
+          {state === "pausing" && currentExercises.length > 0 && (
+            <div style={{ marginTop: "20px" }}>
+              <h2 style={{ fontFamily: "'Poppins', sans-serif", fontSize: "18px", fontWeight: 600, color: BRAND.brown, textAlign: "center", margin: "0 0 14px" }}>
+                {exerciseCount === 1 ? "Deine Übung" : `Übung ${activeExercise + 1} von ${currentExercises.length}`}
+              </h2>
+
+              <ExerciseCard key={currentExercises[activeExercise].id} exercise={currentExercises[activeExercise]} isActive={true} isSingle={true} />
+
+              <div style={{ textAlign: "center", marginTop: "16px", display: "flex", justifyContent: "center", gap: "10px" }}>
+                {activeExercise < currentExercises.length - 1 ? (
+                  <button onClick={() => setActiveExercise(activeExercise + 1)} style={btn(true)}>Nächste Übung</button>
+                ) : (
+                  <button onClick={startWork} style={btn(true)}>Weiterarbeiten</button>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* FOOTER */}
+      <div style={{ textAlign: "center", marginTop: "40px", paddingTop: "20px", borderTop: `1px solid ${BRAND.creamDark}` }}>
+        <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: "10px", letterSpacing: "2px", color: BRAND.warmGray, textTransform: "uppercase" }}>
+          amica mea · das Fitnessloft für Frauen
+        </div>
+      </div>
+    </div>
+  );
+}
+
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>

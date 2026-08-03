@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kursplan — amica mea</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #C43A2A;
+    --orange-light: #D4742C;
+    --brown: #3E2D28;
+    --cream: #FFF9F5;
+    --white: #FFFFFF;
+    --gray-light: #F5F0EC;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Poppins', sans-serif; background: var(--cream); color: var(--brown); padding: 0; }
+  .page { max-width: 900px; margin: 0 auto; background: var(--white); min-height: 100vh; }
+
+  .header { background: var(--brown); color: var(--white); padding: 36px 40px 34px; position: relative; overflow: hidden; }
+  .header::after { content: ''; position: absolute; bottom: -20px; left: 0; right: 0; height: 40px; background: var(--white); border-radius: 50% 50% 0 0; }
+  .header h1 { font-size: 90px; font-weight: 300; letter-spacing: -1px; line-height: 1; color: var(--orange-light); font-family: 'Poppins', sans-serif; text-transform: uppercase; }
+  .header .subtitle { font-size: 10px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; }
+  .header .info { margin-top: 14px; font-size: 12px; font-weight: 400; opacity: 0.6; }
+  .badge { display: inline-block; background: var(--orange); color: var(--white); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+
+  .legend { display: flex; gap: 20px; padding: 20px 40px 10px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--brown); opacity: 0.7; }
+
+  .days-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 10px 30px 30px; }
+  .day-card { padding: 16px 12px; border-bottom: 1px solid var(--gray-light); }
+  .day-card:nth-child(odd) { border-right: 1px solid var(--gray-light); padding-right: 20px; }
+  .day-card:nth-child(even) { padding-left: 20px; }
+  .day-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--orange); margin-bottom: 12px; }
+
+  .course { margin-bottom: 8px; }
+  .course-main { display: flex; align-items: baseline; gap: 5px; line-height: 1.4; }
+  .course-time { font-size: 12px; font-weight: 600; color: var(--brown); min-width: 38px; font-variant-numeric: tabular-nums; }
+  .course-emoji { font-size: 14px; min-width: 18px; text-align: center; }
+  .course-name { font-size: 12px; font-weight: 600; color: var(--brown); }
+  .mama-badge { display: inline-block; font-size: 12px; margin-left: 2px; }
+  .course-sub { font-size: 9px; font-weight: 600; color: var(--orange); opacity: 0.65; margin-left: 62px; margin-top: -1px; font-style: normal; letter-spacing: 0.3px; }
+
+  .divider { height: 1px; background: var(--gray-light); margin: 10px 0; }
+
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; padding: 0 30px; }
+  .sunday { padding: 16px 12px; padding-right: 20px; border-right: 1px solid var(--gray-light); }
+  .footer-cell { padding: 16px 12px; padding-left: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .footer-cell .logo-text { font-size: 28px; font-weight: 700; color: var(--brown); font-style: italic; line-height: 1.2; }
+  .footer-cell .logo-sub { font-size: 9px; font-weight: 400; letter-spacing: 1px; color: var(--brown); opacity: 0.5; }
+
+  .bottom-bar { background: var(--brown); color: var(--white); padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .bottom-bar .booking { font-size: 12px; font-weight: 400; }
+  .bottom-bar .booking strong { font-weight: 700; }
+  .bottom-bar .phone { font-size: 12px; font-weight: 300; opacity: 0.7; }
+
+  .kursinfo { padding: 30px 40px; background: var(--gray-light); }
+  .kursinfo h2 { font-size: 18px; font-weight: 700; color: var(--brown); margin-bottom: 20px; }
+  .kursinfo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .kursinfo-item { display: flex; gap: 10px; align-items: flex-start; }
+  .kursinfo-emoji { font-size: 22px; min-width: 30px; text-align: center; line-height: 1.4; }
+  .kursinfo-text h3 { font-size: 13px; font-weight: 700; color: var(--brown); margin-bottom: 2px; }
+  .kursinfo-text p { font-size: 11px; font-weight: 400; color: var(--brown); opacity: 0.65; line-height: 1.5; }
+
+  @media (max-width: 600px) {
+    .days-grid { grid-template-columns: 1fr; }
+    .day-card:nth-child(odd) { border-right: none; padding-right: 12px; }
+    .day-card:nth-child(even) { padding-left: 12px; }
+    .bottom-row { grid-template-columns: 1fr; }
+    .sunday { border-right: none; }
+    .kursinfo-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 36px; }
+    .course-sub { margin-left: 62px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <h1>Kursplan</h1>
+      <div style="text-align: right; padding-bottom: 8px;">
+        <div>
+          <span style="font-size: 20px; font-weight: 300; color: rgba(255,255,255,0.85); font-family: 'Playfair Display', Georgia, serif; letter-spacing: 1px;">amica </span>
+          <span style="font-size: 20px; font-weight: 400; color: var(--orange-light); font-family: 'Playfair Display', Georgia, serif; letter-spacing: 1px;">mea</span>
+        </div>
+        <p style="font-size: 7px; color: rgba(255,255,255,0.4); margin: -1px 0 0; font-weight: 400; font-family: 'Playfair Display', Georgia, serif; text-align: right; letter-spacing: 0.5px;">das Fitnessloft für Frauen</p>
+        <div class="badge" style="margin-top: 8px; font-size: 10px; padding: 5px 12px;">Ab 15. Juni 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">👶 Mama & Me</div>
+    <div class="legend-item">⚡ Express (10 Min.)</div>
+  </div>
+
+  <div id="aug-hinweis" style="display:none; max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
+    ✨ Ab Montag, den 10. August, gilt unser aktualisierter Kursplan — alle Termine findest du wie immer in der App.
+  </div>
+
+  <div class="days-grid">
+
+    <!-- MONTAG -->
+    <div class="day-card">
+      <div class="day-name">Montag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">8:00</span>
+            <span class="course-emoji">🚀</span>
+            <span class="course-name">Boost it!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">🌟</span>
+            <span class="course-name">Zeit für mich</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course" data-plan="current">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Beckenboden Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course" data-plan="aug" style="display:none">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">🎬</span>
+            <span class="course-name">Studio Session</span>
+          </div>
+          <div class="course-sub">30 Minuten · Freies Training</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">17:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">18:00</span>
+            <span class="course-emoji">🎯</span>
+            <span class="course-name">Your Move!</span>
+          </div>
+          <div class="course-sub">Freies Training</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">19:00</span>
+            <span class="course-emoji">🚀</span>
+            <span class="course-name">Boost it!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIENSTAG -->
+    <div class="day-card">
+      <div class="day-name">Dienstag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">🌟</span>
+            <span class="course-name">Zeit für mich</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course" data-plan="aug" style="display:none">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Fußgymnastik Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">10:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Beckenboden Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">16:00</span>
+            <span class="course-emoji">🧱</span>
+            <span class="course-name">Richte Dich auf!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">17:00</span>
+            <span class="course-emoji">🥊</span>
+            <span class="course-name">Fight Club</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">18:00</span>
+            <span class="course-emoji">☯️</span>
+            <span class="course-name">In Balance</span>
+          </div>
+          <div class="course-sub">Training auf der Matte</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MITTWOCH -->
+    <div class="day-card">
+      <div class="day-name">Mittwoch</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">8:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">🧱</span>
+            <span class="course-name">Richte Dich auf!</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course" data-plan="current">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Fußgymnastik Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course" data-plan="aug" style="display:none">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Beckenboden Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course" data-plan="current">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">🎬</span>
+            <span class="course-name">Studio Session</span>
+          </div>
+          <div class="course-sub">30 Minuten · Freies Training</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">17:00</span>
+            <span class="course-emoji">🚀</span>
+            <span class="course-name">Boost it!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">18:00</span>
+            <span class="course-emoji">🧘‍♀️</span>
+            <span class="course-name">Pilates</span>
+          </div>
+          <div class="course-sub">Training auf der Matte</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">19:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">19:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Stretching Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DONNERSTAG -->
+    <div class="day-card">
+      <div class="day-name">Donnerstag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">🌟</span>
+            <span class="course-name">Zeit für mich</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Mach Dich locker! Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">🕉️</span>
+            <span class="course-name">Mindful Yoga</span>
+          </div>
+          <div class="course-sub">Training auf der Matte</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">18:00</span>
+            <span class="course-emoji">🚀</span>
+            <span class="course-name">Boost it!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">18:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Mach Dich locker! Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FREITAG -->
+    <div class="day-card">
+      <div class="day-name">Freitag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">8:00</span>
+            <span class="course-emoji">🚀</span>
+            <span class="course-name">Boost it!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">🌟</span>
+            <span class="course-name">Zeit für mich</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAMSTAG -->
+    <div class="day-card">
+      <div class="day-name">Samstag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:00</span>
+            <span class="course-emoji">💪</span>
+            <span class="course-name">Stärke Dich selbst!</span>
+            <span class="mama-badge">👶</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Fußgymnastik Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">💆</span>
+            <span class="course-name">Mach Dich locker!</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">11:00</span>
+            <span class="course-emoji">🥊</span>
+            <span class="course-name">Fight Club</span>
+          </div>
+          <div class="course-sub">Zirkeltraining</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding: 0 30px 20px;">
+    <div class="day-card" style="border-bottom: none; padding-left: 12px;">
+      <div class="day-name">Sonntag</div>
+      <div class="time-block">
+        <div class="course">
+          <div class="course-main">
+            <span class="course-time">11:00</span>
+            <span class="course-emoji">🌊</span>
+            <span class="course-name">Vinyasa Yoga</span>
+          </div>
+          <div class="course-sub">Training auf der Matte</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar" style="padding: 6px 40px;"></div>
+
+  <div class="kursinfo">
+    <h2>Unsere Kurse im Überblick</h2>
+    <div class="kursinfo-grid">
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🚀</span>
+        <div class="kursinfo-text">
+          <h3>Boost it!</h3>
+          <p>Dein Cardio-Kick. Schwitzen, Energie tanken, Kopf frei kriegen.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🥊</span>
+        <div class="kursinfo-text">
+          <h3>Fight Club</h3>
+          <p>Volle Power. Auspowern bis der Kopf leer ist.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🌟</span>
+        <div class="kursinfo-text">
+          <h3>Zeit für mich</h3>
+          <p>Dein Allround-Zirkel. Kraft, Ausdauer, Beweglichkeit — alles drin, alles für dich.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">💪</span>
+        <div class="kursinfo-text">
+          <h3>Stärke Dich selbst!</h3>
+          <p>Kraft aufbauen, Körper formen, sich selbst spüren.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🧱</span>
+        <div class="kursinfo-text">
+          <h3>Richte Dich auf!</h3>
+          <p>Rücken stärken, Haltung verbessern, schmerzfrei durch den Alltag.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">💆</span>
+        <div class="kursinfo-text">
+          <h3>Mach Dich locker!</h3>
+          <p>Schultern runter, Nacken frei, Verspannungen lösen.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🎯</span>
+        <div class="kursinfo-text">
+          <h3>Your Move!</h3>
+          <p>Dein Training, dein Tempo, dein Fokus. Individuell angeleitet.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🎬</span>
+        <div class="kursinfo-text">
+          <h3>Studio Session</h3>
+          <p>Heute live dabei — morgen im Amica Mea Onlinebereich. Eva trainiert, filmt — und alle die Lust haben, machen einfach mit. 30 Minuten, ohne Geräte, direkt aus dem Loft. Die Kamera läuft — aber du bestimmst wo du stehst.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">☯️</span>
+        <div class="kursinfo-text">
+          <h3>In Balance</h3>
+          <p>Zur Ruhe kommen, Gleichgewicht finden, den Tag loslassen.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🧘‍♀️</span>
+        <div class="kursinfo-text">
+          <h3>Pilates</h3>
+          <p>Tiefe Muskeln, starke Mitte, bewusste Bewegung.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🕉️</span>
+        <div class="kursinfo-text">
+          <h3>Mindful Yoga</h3>
+          <p>Atmen, spüren, ankommen.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🌊</span>
+        <div class="kursinfo-text">
+          <h3>Vinyasa Yoga</h3>
+          <p>Fließende Bewegung, Kraft und Ruhe im Flow.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar" style="flex-direction: column; text-align: center; gap: 8px; padding: 28px 40px;">
+    <div style="font-size: 15px; font-weight: 600; color: var(--orange-light);">Neugierig geworden?</div>
+    <div style="font-size: 15px; font-weight: 600; line-height: 1.6;">Schreib uns per WhatsApp oder ruf uns an: <br><span style="font-size: 18px; font-weight: 700; color: var(--orange-light);">0177 / 88 59 559</span></div>
+    <div style="font-size: 13px; font-weight: 400; opacity: 0.8; line-height: 1.5; margin-top: 4px;">Probetraining direkt buchen unter <strong>www.amicamea.de</strong></div>
+  </div>
+
+</div>
+<script>
+  // Datumsweiche: Ab 10. August 2026 gilt der neue Kursplan
+  (function() {
+    var AUG_START = new Date(2026, 7, 10);
+    var isAug = new Date() >= AUG_START;
+    document.querySelectorAll("[data-plan]").forEach(function(el) {
+      el.style.display = (el.getAttribute("data-plan") === (isAug ? "aug" : "current")) ? "" : "none";
+    });
+    if (!isAug) document.getElementById("aug-hinweis").style.display = "block";
+  })();
+</script>
+</body>
+</html>
