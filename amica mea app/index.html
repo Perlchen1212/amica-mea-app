@@ -270,7 +270,7 @@ const SOS_EXTRA_NEW = {
 const SOS_EXCLUDE_AUG = {};
 const SOS_EXTRA_AUG = {
   Mo: [
-    { id: "aug-mo-sos-1", time: "09:45", label: "SOS-Termin Vormittag" },
+    { id: "aug-mo-sos-1", time: "08:45", label: "SOS-Termin Vormittag" },
     { id: "aug-mo-sos-2", time: "17:45", label: "SOS-Termin Abend" },
   ],
   Di: [{ id: "aug-di-sos-1", time: "17:45", label: "SOS-Termin Nachmittag" }],
@@ -784,6 +784,32 @@ const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onResto
   );
 };
 // ─── BESTÄTIGUNGSDIALOG (Banner-Stil unten) ───
+const TrialRestartDialog = ({ member, onConfirm, onCancel }) => {
+  const heute = (() => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); })();
+  const [start, setStart] = useState(heute);
+  const endeAnzeige = (() => {
+    if (!start) return "";
+    const d = new Date(start + "T00:00:00");
+    if (isNaN(d)) return "";
+    d.setDate(d.getDate() + 7);
+    return String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + "." + d.getFullYear();
+  })();
+  return (
+    <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(3px)", zIndex: 620, fontFamily: FONT, display: "flex", alignItems: "center", justifyContent: "center", padding: "18px" }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.white, borderRadius: "16px", padding: "22px 20px", maxWidth: "320px", width: "100%", boxShadow: "0 12px 36px rgba(0,0,0,0.18)" }}>
+        <h3 style={{ fontSize: "15px", fontWeight: 700, color: C.darkBrown, margin: "0 0 4px" }}>Probewoche neu starten</h3>
+        <p style={{ fontSize: "12px", color: C.textMid, margin: "0 0 14px" }}>f&uuml;r {member.name}</p>
+        <label style={{ display: "block", fontSize: "10px", fontWeight: 600, color: C.textMid, marginBottom: "4px" }}>Startdatum</label>
+        <input type="date" value={start} onChange={(e) => setStart(e.target.value)} style={{ width: "100%", padding: "9px 10px", borderRadius: "9px", border: `1px solid ${C.border}`, fontSize: "13px", fontFamily: FONT, color: C.darkBrown, marginBottom: "10px", boxSizing: "border-box" }} />
+        {endeAnzeige && <p style={{ fontSize: "11px", color: C.textMid, margin: "0 0 16px" }}>Die Probewoche l&auml;uft dann bis zum {endeAnzeige}.</p>}
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button onClick={onCancel} style={{ flex: 1, padding: "10px", background: C.pageBg, color: C.textMid, border: "none", borderRadius: "10px", fontSize: "12px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Abbrechen</button>
+          <button disabled={!start} onClick={() => onConfirm(start)} style={{ flex: 1, padding: "10px", background: C.orange, color: C.white, border: "none", borderRadius: "10px", fontSize: "12px", fontWeight: 700, cursor: start ? "pointer" : "default", opacity: start ? 1 : 0.5, fontFamily: FONT }}>Neu starten</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 const ConfirmDialog = ({ text, onConfirm, onCancel }) => (
   <div onClick={onCancel} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.08)", zIndex: 450, fontFamily: FONT, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: "64px" }}>
     <div onClick={(e) => e.stopPropagation()} style={{ width: "calc(100% - 24px)", maxWidth: "410px", animation: "scaleIn 0.15s" }}>
@@ -918,6 +944,7 @@ function LoginScreen({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [trialRestart, setTrialRestart] = useState(null);
   const [regName, setRegName] = useState("");
   const [regLastName, setRegLastName] = useState("");
   const [regBirthday, setRegBirthday] = useState("");
@@ -1396,6 +1423,18 @@ function App() {
     setAllMembers(p => p.map(x => x.id === mid ? { ...x, accountType: newType, trialExpires: newType === "member" ? null : x.trialExpires } : x));
     await dbUpdate("members", `id=eq.${encodeURIComponent(mid)}`, updates);
     logActivity("status_aenderung", `${m?.name}: ${newType === "member" ? "Gast → Mitglied freigeschaltet" : "Mitglied → Gast"}`, m?.name || "", mid);
+  };
+  const restartTrial = async (mid, startDatum) => {
+    const m = allMembers.find(x => x.id === mid);
+    // trial_expires = Startdatum + 14 Tage (7 Tage offiziell, 7 Tage stille Kulanz)
+    const d = new Date(startDatum + "T00:00:00");
+    d.setDate(d.getDate() + 14);
+    const neu = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+    const updates = { account_type: "trial", trial_expires: neu };
+    setAllMembers(p => p.map(x => x.id === mid ? { ...x, accountType: "trial", trialExpires: neu } : x));
+    await dbUpdate("members", `id=eq.${encodeURIComponent(mid)}`, updates);
+    const anzeige = startDatum.split("-").reverse().join(".");
+    logActivity("probewoche_neustart", `${m?.name}: Probewoche neu gestartet ab ${anzeige}`, m?.name || "", mid);
   };
   const isAdmin = user?.isAdmin;
   const isTrainer = user?.isTrainer || false;
@@ -2577,6 +2616,7 @@ function App() {
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "3px", alignItems: "flex-end", flexShrink: 0 }}>
                     <button onClick={() => toggleAccountType(m.id)} style={{ background: mIsTrial ? C.orange : C.greenLight, color: mIsTrial ? C.white : C.green, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "9px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>{mIsTrial ? "→ Mitglied" : "✓ Mitglied"}</button>
+                    {mIsTrial && <button onClick={() => setTrialRestart(m)} style={{ background: C.pageBg, color: C.textMid, border: `1px solid ${C.border}`, borderRadius: "5px", padding: "3px 8px", fontSize: "9px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>↻ Woche neu</button>}
                     <button onClick={async () => { if (confirm(`${m.name} wirklich löschen?`)) { await backupMarketingContact(m); await dbDelete("members", `id=eq.${encodeURIComponent(m.id)}`); setAllMembers(p => p.filter(x => x.id !== m.id)); } }} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "9px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Löschen</button>
                   </div>
                 </div>
@@ -2816,6 +2856,7 @@ function App() {
         </div>
       )}
       {popup && !confirmDialog && <Popup text={popup.text} type={popup.type} onClose={() => setPopup(null)} />}
+      {trialRestart && <TrialRestartDialog member={trialRestart} onCancel={() => setTrialRestart(null)} onConfirm={async (d) => { const mm = trialRestart; setTrialRestart(null); await restartTrial(mm.id, d); setPopup({ text: `Probewoche für ${mm.name} neu gestartet`, type: "booked" }); }} />}
       {pickingMassage && <TypePicker onPick={(type, note) => { bookMassage(pickingMassage.id, pickingMassage.dk, type, note); setPickingMassage(null); }} onCancel={() => setPickingMassage(null)} />}
       {confirmDialog && <ConfirmDialog text={confirmDialog.text} onConfirm={confirmDialog.onConfirm} onCancel={confirmDialog.onCancel} />}
       {adminSheet && <AdminSheet course={adminSheet.course || adminSheet} dayKey={adminSheet.dayKey} bookings={bookings} cancelled={cancelled} substitute={substitute}
