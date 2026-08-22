@@ -944,7 +944,6 @@ function LoginScreen({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-  const [trialRestart, setTrialRestart] = useState(null);
   const [regName, setRegName] = useState("");
   const [regLastName, setRegLastName] = useState("");
   const [regBirthday, setRegBirthday] = useState("");
@@ -1223,6 +1222,7 @@ function App() {
   const [substitute, setSubstitute] = useState({});
   const [messages, setMessages] = useState([]);
   const [popup, setPopup] = useState(null);
+  const [trialRestart, setTrialRestart] = useState(null);
   const [view, setView] = useState("kurse");
   const [weekOffset, setWeekOffset] = useState(0);
   const [pickingMassage, setPickingMassage] = useState(null);
