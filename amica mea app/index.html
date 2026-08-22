@@ -921,7 +921,6 @@ function LoginScreen({ onLogin }) {
   const [regName, setRegName] = useState("");
   const [regLastName, setRegLastName] = useState("");
   const [regBirthday, setRegBirthday] = useState("");
-  const [regMarketing, setRegMarketing] = useState(false);
   const [regEmail, setRegEmail] = useState("");
   const [regPin, setRegPin] = useState("");
   const [regPin2, setRegPin2] = useState("");
@@ -967,7 +966,7 @@ function LoginScreen({ onLogin }) {
       const newId = "m" + Date.now();
       const trialExpires = new Date(); trialExpires.setDate(trialExpires.getDate() + 14);
       const trialExpiresStr = trialExpires.getFullYear() + "-" + String(trialExpires.getMonth()+1).padStart(2,"0") + "-" + String(trialExpires.getDate()).padStart(2,"0");
-      const result = await dbInsert("members", { id: newId, name: fullName, email: regEmail.toLowerCase(), pin: regPin, is_admin: false, online: false, birthday: regBirthday, account_type: "trial", trial_expires: trialExpiresStr, marketing_consent: regMarketing, marketing_consent_at: regMarketing ? new Date().toISOString() : null });
+      const result = await dbInsert("members", { id: newId, name: fullName, email: regEmail.toLowerCase(), pin: regPin, is_admin: false, online: false, birthday: regBirthday, account_type: "trial", trial_expires: trialExpiresStr, marketing_consent: false, marketing_consent_at: null });
       if (result && result.length > 0) {
         const userData = { id: newId, name: fullName, email: regEmail.toLowerCase(), isAdmin: false, online: false, accountType: "trial", trialExpires: trialExpiresStr };
         try { localStorage.setItem("amicamea_user", JSON.stringify(userData)); } catch(e) {}
@@ -1099,12 +1098,6 @@ function LoginScreen({ onLogin }) {
               )}
             </div>
           ))}
-          <div onClick={() => setRegMarketing(!regMarketing)} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "18px", cursor: "pointer", background: regMarketing ? "#C43A2A08" : "transparent", borderRadius: "10px", padding: "10px 8px" }}>
-            <div style={{ width: "20px", height: "20px", borderRadius: "5px", border: regMarketing ? "none" : "2px solid #3B2A2625", background: regMarketing ? "#C43A2A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
-              {regMarketing && <span style={{ color: "#fff", fontSize: "12px", fontWeight: 700 }}>✓</span>}
-            </div>
-            <span style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.75, lineHeight: 1.5 }}>Ich will dieses Mal dranbleiben! Schickt mir eure 3 Start-E-Mails mit Motivation und Rückenwind für die erste Woche. Ich weiß, dass ich mich jederzeit abmelden kann.</span>
-          </div>
           <button onClick={tryRegister} disabled={loading} style={{ width: "100%", padding: "16px", background: "#4A3832", color: "#FFFFFF", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 600, cursor: "pointer", fontFamily: FONT, opacity: loading ? 0.6 : 1 }}>{loading ? "Wird registriert..." : "Registrieren"}</button>
           <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.45, textAlign: "center", marginTop: "16px" }}>Schon registriert? <button onClick={() => { setScreen("login"); setError(""); }} style={{ background: "none", border: "none", color: "#C43A2A", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Hier einloggen</button></p>
         </div>
