@@ -66,14 +66,14 @@ const dateKey = (d) => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"
 const DAYS_IDX = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 const FULL_DAYS_IDX = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const FULL_DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-const ALL_TRAINERS = ["Eva", "Ellen", "Dani", "Besa", "Julia", "Lilly", "Kathie"];
+const ALL_TRAINERS = ["Eva", "Dani", "Besa", "Julia", "Lilly", "Kathie", "Alina"];
 const TRAINER_ACCOUNTS = {
-  "ellen@amicamea.de": "Ellen",
   "dani@amicamea.de": "Dani",
   "besa@amicamea.de": "Besa",
   "julia@amicamea.de": "Julia",
   "lilly@amicamea.de": "Lilly",
   "kathie@amicamea.de": "Kathie",
+  "alina@amicamea.de": "Alina",
 };
 // ─── KURSPLAN: Alter Plan bis 30.4.2026, neuer Plan ab 1.5.2026 ───
 const SCHEDULE_OLD = {
@@ -237,7 +237,7 @@ const MASSAGE_NEW = {
 const MASSAGE_AUG = {
   Mo: [{ id: 2801, time: "10:30" }, { id: 2802, time: "11:00" }, { id: 2803, time: "16:30" }, { id: 2804, time: "20:00" }, { id: 2805, time: "20:30" }],
   Di: [{ id: 2806, time: "15:30" }, { id: 1802, time: "19:00" }, { id: 1803, time: "19:30" }, { id: 2807, time: "20:00" }, { id: 2808, time: "20:30" }],
-  Fr: [{ id: 1806, time: "11:00" }, { id: 1807, time: "11:30" }],
+  Fr: [{ id: 1806, time: "11:00" }],
   Sa: [{ id: 810, time: "08:00" }, { id: 811, time: "08:30" }, { id: 812, time: "12:00" }, { id: 813, time: "12:30" }],
 };
 const MASSAGE = (() => { const now = new Date(); return now >= AUG_START ? MASSAGE_AUG : now >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD; })();
@@ -732,8 +732,7 @@ const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onResto
                     {p.goal && <div style={{ fontSize: "9px", color: C.teal }}>🎯 {p.goal}</div>}
                   </div>
                 </div>
-                {!readOnly && <button onClick={() => onRemoveBooking(bk, p.id)} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Stornieren</button>}
-                {readOnly && <button onClick={() => onRemoveBooking(bk, p.id)} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Nicht da</button>}
+                <button onClick={() => onRemoveBooking(bk, p.id)} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Nicht da</button>
               </div>
             )) : <p style={{ fontSize: "11px", color: C.textLight, fontStyle: "italic" }}>Keine Anmeldungen</p>}
           </div>
@@ -1555,14 +1554,10 @@ function App() {
     await dbDelete("bookings", `booking_key=eq.${encodeURIComponent(cid)}&member_id=eq.${encodeURIComponent(mid)}`);
     setBookings((p) => ({ ...p, [cid]: (p[cid] || []).filter((x) => x !== mid) }));
     const m = allMembers.find((x) => x.id === mid);
-    setPopup({ text: `${m?.name} storniert`, type: "cancel" });
-    // Unterscheidung: Admin-Storno vs. Trainerin "Nicht da"
-    const isTrainerAcc = Object.keys(TRAINER_ACCOUNTS).includes(user?.email);
-    if (isTrainerAcc) {
-      logActivity("nicht_da", `${m?.name || mid} war nicht da${bkDateLabel(cid)}`, m?.name || "", mid);
-    } else {
-      logActivity("admin_stornierung", `Admin hat Buchung von ${m?.name || mid} storniert${bkDateLabel(cid)}`, m?.name || "", mid);
-    }
+    setPopup({ text: `${m?.name} als nicht da markiert`, type: "cancel" });
+    // Kursteilnehmerin austragen bedeutet immer: war nicht da.
+    // Der Eintrag loest per Trigger die Erinnerungsmail aus.
+    logActivity("nicht_da", `${m?.name || mid} war nicht da${bkDateLabel(cid)}`, m?.name || "", mid);
   };
   const cancelCourse = async (id) => {
     const result = await dbInsert("cancelled_courses", { course_key: id });
@@ -2659,19 +2654,19 @@ function App() {
             {!isAdmin && !isTrainer && (<>
               <div style={{ marginBottom: "8px" }}>
                 <label style={{ display: "block", fontSize: "10px", fontWeight: 600, color: C.textMid, marginBottom: "3px" }}>🎂 Geburtstag</label>
-                <input type="date" value={myBirthday} onChange={(e) => setMyBirthday(e.target.value)} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "12px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none" }} />
+                <input type="date" value={myBirthday} onChange={(e) => { editingProfile.current = true; setMyBirthday(e.target.value); }} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "12px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none" }} />
               </div>
               <div style={{ marginBottom: "8px" }}>
                 <label style={{ display: "block", fontSize: "10px", fontWeight: 600, color: C.textMid, marginBottom: "3px" }}>🎯 Aktuelles Trainingsziel</label>
-                <textarea value={myGoal} onChange={(e) => setMyGoal(e.target.value)} placeholder="z.B. Rücken stärken, Abnehmen, Nach Geburt wieder fit werden" rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
+                <textarea value={myGoal} onChange={(e) => { editingProfile.current = true; setMyGoal(e.target.value); }} placeholder="z.B. Rücken stärken, Abnehmen, Nach Geburt wieder fit werden" rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
               </div>
               <div style={{ marginBottom: "4px" }}>
                 <label style={{ display: "block", fontSize: "10px", fontWeight: 600, color: C.textMid, marginBottom: "3px" }}>⚕️ Gesundheitliche Hinweise</label>
-                <textarea value={myHealth} onChange={(e) => setMyHealth(e.target.value)} placeholder="z.B. Knie rechts schonen, Schwanger, Bandscheibenvorfall" rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
+                <textarea value={myHealth} onChange={(e) => { editingProfile.current = true; setMyHealth(e.target.value); }} placeholder="z.B. Knie rechts schonen, Schwanger, Bandscheibenvorfall" rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
               </div>
               <div style={{ marginBottom: "4px" }}>
                 <label style={{ display: "block", fontSize: "10px", fontWeight: 600, color: C.textMid, marginBottom: "3px" }}>💬 Möchtest du uns etwas fragen oder mitteilen?</label>
-                <textarea value={myQuestion} onChange={(e) => setMyQuestion(e.target.value)} placeholder="z.B. Fragen zum Training, was dich zu uns führt..." rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
+                <textarea value={myQuestion} onChange={(e) => { editingProfile.current = true; setMyQuestion(e.target.value); }} placeholder="z.B. Fragen zum Training, was dich zu uns führt..." rows={2} style={{ width: "100%", padding: "7px 10px", borderRadius: "7px", border: `1px solid ${C.border}`, fontSize: "11px", color: C.darkBrown, fontFamily: FONT, background: C.offWhite, outline: "none", resize: "vertical" }} />
               </div>
               <button onClick={async () => {
                 const me = allMembers.find(m => m.id === user.id);
