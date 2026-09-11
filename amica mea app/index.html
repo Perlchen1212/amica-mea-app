@@ -197,9 +197,9 @@ const SCHEDULE_AUG = {
     { id: 1307, time: "19:45", dur: 10, name: "Stretching Express", trainer: "Lilly", spots: 18, type: "express" },
   ],
   Do: [
-    { id: 1401, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Besa", spots: 18, type: "zirkel", mama: true },
-    { id: 1402, time: "09:45", dur: 10, name: "Mach Dich locker! Express", trainer: "Besa", spots: 18, type: "express" },
-    { id: 1403, time: "10:00", dur: 55, name: "Mindful Yoga", trainer: "Besa", spots: 15, type: "frei" },
+    { id: 1401, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Alina", spots: 18, type: "zirkel", mama: true },
+    { id: 1402, time: "09:45", dur: 10, name: "Mach Dich locker! Express", trainer: "Alina", spots: 18, type: "express" },
+    { id: 1403, time: "10:00", dur: 55, name: "Mindful Yoga", trainer: "Alina", spots: 15, type: "frei" },
     { id: 1404, time: "18:00", dur: 45, name: "Boost it!", trainer: "Julia", spots: 18, type: "zirkel" },
     { id: 1405, time: "18:45", dur: 10, name: "Mach Dich locker! Express", trainer: "Julia", spots: 18, type: "express" },
   ],
@@ -1692,7 +1692,11 @@ function App() {
           // 7 Tage offiziell: zeige an wenn Ablaufdatum minus 7 Tage <= heute (also offizielle Woche um oder bald um)
           // Da trial_expires jetzt 14 Tage ist, ist "offizielle 7 Tage um" = trial_expires minus 7 Tage
           const officialEnd = new Date(exp); officialEnd.setDate(officialEnd.getDate() - 7);
-          return officialEnd <= weekEnd;
+          // Nach oben: Ablauf steht bevor oder ist gerade um.
+          // Nach unten: laenger als 7 Tage komplett abgelaufen wird ausgeblendet,
+          // damit die Uebersicht nur zeigt, wo gerade etwas laeuft. Daten bleiben erhalten.
+          const tageSeitAblauf = Math.floor((today - exp) / 86400000);
+          return officialEnd <= weekEnd && tageSeitAblauf <= 7;
         }).map(m => {
           const exp = new Date(m.trialExpires);
           const officialEnd = new Date(exp); officialEnd.setDate(officialEnd.getDate() - 7);
