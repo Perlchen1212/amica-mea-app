@@ -2161,7 +2161,9 @@ function App() {
               const regDate = new Date(m.trialExpires);
               regDate.setDate(regDate.getDate() - 14); // trial_expires is 14 days after reg
               const daysSinceReg = Math.floor((today - regDate) / 86400000);
-              if (daysSinceReg >= 2) {
+              // Fenster: ab 2 Tagen sichtbar, nach 7 Tagen wieder raus,
+              // damit die To-do-Liste nur zeigt, wo gerade etwas zu tun ist.
+              if (daysSinceReg >= 2 && daysSinceReg <= 7) {
                 const hasBooking = Object.keys(bookings).some(key => {
                   if (key.includes("-sos-") || key.includes("-probe-")) return false;
                   const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
@@ -2177,7 +2179,7 @@ function App() {
             const recentProfileChanges = activityLog.filter(l => {
               const d = new Date(l.created_at);
               const daysDiff = Math.floor((today - d) / 86400000);
-              return daysDiff <= 7 && l.action === "profil_update";
+              return daysDiff <= 3 && l.action === "profil_update";
             });
             recentProfileChanges.forEach(l => {
               todos.push({ icon: "📝", text: `${l.member_name} – ${l.details}`, priority: 3 });
