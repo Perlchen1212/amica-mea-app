@@ -926,7 +926,7 @@ const Nav = ({ active, go, isAdmin, isTrainer, hasNotif }) => {
   const items = isAdmin
     ? [{ id: "kurse", i: "📅", l: "Kurse" }, { id: "massage", i: "💆", l: "Behandlung" }, { id: "gym", i: "💪", l: "Open Gym" }, { id: "online", i: "🎬", l: "Online" }, { id: "protokoll", i: "📊", l: "Protokoll" }, { id: "meine", i: "📌", l: "To-do" }]
     : isTrainer
-    ? [{ id: "kurse", i: "📅", l: "Kurse" }, { id: "profil", i: "👤", l: "Profil" }]
+    ? [{ id: "kurse", i: "📅", l: "Kurse" }, { id: "online", i: "🎬", l: "Online" }, { id: "profil", i: "👤", l: "Profil" }]
     : [{ id: "kurse", i: "📅", l: "Kurse" }, { id: "massage", i: "💆", l: "Behandlung" }, { id: "gym", i: "💪", l: "Open Gym" }, { id: "online", i: "🎬", l: "Online Club" }, { id: "meine", i: "🎯", l: "Meine Termine" }];
   return (
     <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(16px)", borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "space-around", padding: "3px 0 max(3px, env(safe-area-inset-bottom))", zIndex: 100 }}>
@@ -1463,7 +1463,9 @@ function App() {
     const diff = Math.ceil((new Date(exp) - today) / 86400000);
     return Math.max(0, diff);
   })();
-  const hasOnline = !isAdmin && !isTrainer && (onlineSet.has(user?.id) || (isTrial && !isTrialExpired));
+  // Trainerinnen haben den Online-Bereich dauerhaft frei, damit sie die Videos
+  // zur eigenen Fortbildung nutzen koennen.
+  const hasOnline = !isAdmin && (isTrainer || onlineSet.has(user?.id) || (isTrial && !isTrialExpired));
   // ─── BUCHEN MIT SUPABASE + BESTÄTIGUNG + UNDO + LOG ───
   const bkDateLabel = (bk) => {
     const parts = bk.split("-");
