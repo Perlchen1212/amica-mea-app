@@ -67,6 +67,86 @@ const DAYS_IDX = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 const FULL_DAYS_IDX = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const FULL_DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const ALL_TRAINERS = ["Eva", "Dani", "Besa", "Julia", "Lilly", "Kathie", "Alina"];
+// ─── FEIERTAGE NORDRHEIN-WESTFALEN ───
+// An gesetzlichen Feiertagen (plus Weiberfastnacht, Karnevalssonntag, Rosenmontag, Veilchendienstag, Muttertag) fallen Kurse, Behandlungen und SOS-Termine automatisch aus.
+// Open Gym bleibt geöffnet (alle Stunden 7 bis 21 Uhr frei, weil keine Kurse blocken).
+// Gilt erst ab dem 4. Oktober 2026, damit der händisch geblockte 3. Oktober unverändert bleibt.
+const FEIERTAG_LOGIK_AB = new Date(2026, 9, 4);
+const osterSonntag = (jahr) => {
+  const a = jahr % 19, b = Math.floor(jahr / 100), c = jahr % 100;
+  const d = Math.floor(b / 4), e = b % 4;
+  const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const monat = Math.floor((h + l - 7 * m + 114) / 31);
+  const tag = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(jahr, monat - 1, tag);
+};
+// Zusaetzliche Schliesstage, Format "MM-TT": { "12-24": "Heiligabend" }
+const ZUSATZ_SCHLIESSTAGE = {};
+const FEIERTAGE_CACHE = {};
+const feiertageNRW = (jahr) => {
+  if (FEIERTAGE_CACHE[jahr]) return FEIERTAGE_CACHE[jahr];
+  const os = osterSonntag(jahr);
+  const plus = (tage) => { const d = new Date(os); d.setDate(os.getDate() + tage); return d; };
+  const map = {};
+  const setzen = (d, name) => { map[dateKey(d)] = name; };
+  setzen(new Date(jahr, 0, 1), "Neujahr");
+  setzen(plus(-2), "Karfreitag");
+  setzen(plus(1), "Ostermontag");
+  setzen(new Date(jahr, 4, 1), "Tag der Arbeit");
+  setzen(plus(39), "Christi Himmelfahrt");
+  setzen(plus(50), "Pfingstmontag");
+  setzen(plus(60), "Fronleichnam");
+  setzen(new Date(jahr, 9, 3), "Tag der Deutschen Einheit");
+  setzen(new Date(jahr, 10, 1), "Allerheiligen");
+  setzen(new Date(jahr, 11, 25), "1. Weihnachtstag");
+  setzen(new Date(jahr, 11, 26), "2. Weihnachtstag");
+  // Kölner Karneval: kein gesetzlicher Feiertag, im Loft aber immer geschlossen
+  setzen(plus(-52), "Weiberfastnacht");
+  setzen(plus(-48), "Rosenmontag");
+  setzen(plus(-49), "Karnevalssonntag");
+  setzen(plus(-47), "Veilchendienstag");
+  // Muttertag: zweiter Sonntag im Mai (sonntags läuft nur Yoga, das fällt aus)
+  const ersterMai = new Date(jahr, 4, 1);
+  const muttertag = new Date(jahr, 4, 1 + ((7 - ersterMai.getDay()) % 7) + 7);
+  setzen(muttertag, "Muttertag");
+  Object.entries(ZUSATZ_SCHLIESSTAGE).forEach(([md, name]) => { map[jahr + "-" + md] = name; });
+  FEIERTAGE_CACHE[jahr] = map;
+  return map;
+};
+const feiertagName = (d) => d >= FEIERTAG_LOGIK_AB ? (feiertageNRW(d.getFullYear())[dateKey(d)] || null) : null;
+const istFeiertag = (d) => !!feiertagName(d);
+const LEERER_PLAN = {};
+// ─── SONDERPLAN WEIHNACHTEN 2026 ───
+// An diesen Tagen ersetzt der Sonderplan den normalen Wochenplan komplett.
+// Leere Liste = Tag ohne Kurse (Silvester: nur Open Gym).
+const SONDERPLAN = {
+  "2026-12-24": { label: "Heiligabend, Weihnachtszirkel mit Sekt und Plätzchen", kurse: [
+    { id: 4901, time: "09:00", dur: 45, name: "Weihnachtszirkel", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 4902, time: "10:00", dur: 45, name: "Weihnachtszirkel", trainer: "Eva", spots: 18, type: "zirkel" },
+  ] },
+  "2026-12-28": { label: "Zwischen den Jahren, Weihnachts-Specials", kurse: [
+    { id: 1901, time: "10:00", dur: 45, name: "Cookie-Crusher", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 1902, time: "11:00", dur: 45, name: "Glühwein-Gegengift", trainer: "Eva", spots: 18, type: "zirkel" },
+  ] },
+  "2026-12-29": { label: "Zwischen den Jahren, Weihnachts-Specials", kurse: [
+    { id: 2901, time: "10:00", dur: 45, name: "Sofakissen-Escape", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 2902, time: "11:00", dur: 45, name: "Stollen-Schmelzer", trainer: "Eva", spots: 18, type: "zirkel" },
+  ] },
+  "2026-12-30": { label: "Zwischen den Jahren, Weihnachts-Specials", kurse: [
+    { id: 3901, time: "10:00", dur: 45, name: "Festtags-Freischein", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 3902, time: "11:00", dur: 45, name: "Finale Furioso", trainer: "Eva", spots: 18, type: "zirkel" },
+  ] },
+  "2026-12-31": { label: "Silvester: Open Gym ist geöffnet!", kurse: [] },
+};
+const sonderplanFuer = (d) => SONDERPLAN[dateKey(d)] || null;
+// Behandlungspause: keine Behandlungen und SOS-Termine vom 24.12. bis 31.12.2026
+const BEHANDLUNGSPAUSE_VON = new Date(2026, 11, 24);
+const BEHANDLUNGSPAUSE_BIS = new Date(2026, 11, 31, 23, 59, 59);
+const istBehandlungspause = (d) => d >= BEHANDLUNGSPAUSE_VON && d <= BEHANDLUNGSPAUSE_BIS;
 const TRAINER_ACCOUNTS = {
   "dani@amicamea.de": "Dani",
   "besa@amicamea.de": "Besa",
@@ -219,7 +299,7 @@ const SCHEDULE_AUG = {
 // Datumsbasierte Umschaltung: Ab 1. Mai 2026 gilt der neue Plan, ab 10. August 2026 der August-Plan
 const MAI_START = new Date(2026, 4, 1); // 1. Mai 2026
 const AUG_START = new Date(2026, 7, 10); // 10. August 2026
-const getScheduleForDate = (d) => d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
+const getScheduleForDate = (d) => istFeiertag(d) ? LEERER_PLAN : sonderplanFuer(d) ? { [DAYS_IDX[d.getDay()]]: sonderplanFuer(d).kurse } : d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
 const SCHEDULE = (() => { const now = new Date(); return now >= AUG_START ? SCHEDULE_AUG : now >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD; })();
 const MASSAGE_OLD = {
   Di: [{ id: 801, time: "16:30" }, { id: 802, time: "20:00" }, { id: 803, time: "20:30" }],
@@ -241,7 +321,7 @@ const MASSAGE_AUG = {
   Sa: [{ id: 810, time: "08:00" }, { id: 811, time: "08:30" }, { id: 812, time: "12:00" }, { id: 813, time: "12:30" }],
 };
 const MASSAGE = (() => { const now = new Date(); return now >= AUG_START ? MASSAGE_AUG : now >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD; })();
-const getMassageForDate = (d) => d >= AUG_START ? MASSAGE_AUG : d >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD;
+const getMassageForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= AUG_START ? MASSAGE_AUG : d >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD;
 const MASSAGE_TYPES = ["Massage / Körperarbeit", "Personal Training", "Kinesiologisches Coaching", "Ernährungsberatung"];
 // SOS: Kursbasierte Zeiten ausschließen + freie Extraslots hinzufügen
 const SOS_EXCLUDE_OLD = {
@@ -280,7 +360,7 @@ const SOS_EXTRA_AUG = {
 const SOS_EXCLUDE = (() => { const now = new Date(); return now >= AUG_START ? SOS_EXCLUDE_AUG : now >= MAI_START ? SOS_EXCLUDE_NEW : SOS_EXCLUDE_OLD; })();
 const getSosExcludeForDate = (d) => d >= AUG_START ? SOS_EXCLUDE_AUG : d >= MAI_START ? SOS_EXCLUDE_NEW : SOS_EXCLUDE_OLD;
 const SOS_EXTRA = (() => { const now = new Date(); return now >= AUG_START ? SOS_EXTRA_AUG : now >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD; })();
-const getSosExtraForDate = (d) => d >= AUG_START ? SOS_EXTRA_AUG : d >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD;
+const getSosExtraForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= AUG_START ? SOS_EXTRA_AUG : d >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD;
 // ─── OPEN GYM DYNAMISCH GENERIEREN ───
 const generateOpenGym = (schedule, massage) => {
   const result = {};
@@ -317,8 +397,16 @@ const generateOpenGym = (schedule, massage) => {
 const OPEN_GYM_OLD = generateOpenGym(SCHEDULE_OLD, MASSAGE_OLD);
 const OPEN_GYM_NEW = generateOpenGym(SCHEDULE_NEW, MASSAGE_NEW);
 const OPEN_GYM_AUG = generateOpenGym(SCHEDULE_AUG, MASSAGE_AUG);
+// Feiertag: keine Kurse und Behandlungen, also alle Open-Gym-Stunden frei
+const OPEN_GYM_ALLE = generateOpenGym({}, {});
 const OPEN_GYM = (() => { const now = new Date(); return now >= AUG_START ? OPEN_GYM_AUG : now >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD; })();
-const getOpenGymForDate = (d) => d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
+const OPEN_GYM_SONDER_CACHE = {};
+const getOpenGymForDate = (d) => {
+  if (istFeiertag(d)) return OPEN_GYM_ALLE;
+  const sp = sonderplanFuer(d);
+  if (sp) { const dk = dateKey(d); if (!OPEN_GYM_SONDER_CACHE[dk]) OPEN_GYM_SONDER_CACHE[dk] = generateOpenGym({ [DAYS_IDX[d.getDay()]]: sp.kurse }, {}); return OPEN_GYM_SONDER_CACHE[dk]; }
+  return d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
+};
 // ─── LOGO (Echtes Amica Mea Logo) ───
 const AmicaLogo = ({ size = 64 }) => (
   <div style={{ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -328,6 +416,13 @@ const AmicaLogo = ({ size = 64 }) => (
 const LOGO_ROUND = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAeAB4DASIAAhEBAxEB/8QAGgABAAEFAAAAAAAAAAAAAAAABQQBAgMGB//EACoQAAIBAwIFBAEFAAAAAAAAAAECAwQFEQAhBhIxQXETIlFhFDJSYpGh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAgED/8QAGxEAAwEAAwEAAAAAAAAAAAAAAQIRABIxQSH/2gAMAwEAAhEDEQA/AO/O6xozuwVVGSxOABoRL1X1kim3WppqZmwKqaUQoR8qpyxH3gZ7apealJbrRWyRlEDI9VUg940KhVx8FmHnlI0iLpRYOJugz+k9PnprM8i0sG0AAWynHSX+a31AS7W6Wmp2IAq42EkQJ/djdfJGPGnAQwBBBB3BGo009LMjQSkMrgqyspwR30dwuZI7Y9JI5f8AFlaJC3XkB9oP2BtpKfLdGHyyY/jWKrpIqK/UMImltsheaIbNLARh1z/Rwe4B7aStV6snE1MJaCqiqOUe6POHjz2ZeoPnTBAYEEAg7EHWr3LgCyV071UMUlFVkbTUsjRkH52I/wAxokMGq9HUFSsbsaddbpabNFz1bONuZVQM7Oc7AAdSTsB3JGNZOHKWrgtjT16enWVcrVM0ec+mW6Jn+KgDyDq228N0NA0FRKrVdfEgU1dQ7SPnGCV5ieXP1pnTxJ8G/9k=";
 const LogoSmall = ({ s = 28 }) => (
   <img src={LOGO_ROUND} alt="am" style={{ width: s, height: s, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+);
+// Hinweiszeile an Feiertagen (Kurse und Behandlungen)
+const FeiertagHinweis = ({ name, text }) => (
+  <div style={{ padding: "12px", background: C.white, borderRadius: "8px", border: `1px solid ${C.border}`, textAlign: "center" }}>
+    <div style={{ fontSize: "12px", fontWeight: 700, color: C.darkBrown }}>{name}</div>
+    <div style={{ fontSize: "11px", color: C.textMid, marginTop: "2px" }}>{text}</div>
+  </div>
 );
 // Videos werden aus Supabase geladen — siehe useEffect in OnlineLib
 const VidCard = ({ video, onPlay }) => {
@@ -1281,10 +1376,22 @@ function App() {
   // ─── DATEN AUS SUPABASE LADEN ───
   const loadData = useCallback(async () => {
     try {
-      const [membersData, bookingsData, cancelledData, subsData, notesData] = await Promise.all([
+      let [membersData, bookingsData, cancelledData, subsData, notesData] = await Promise.all([
         dbGet("members"), dbGet("bookings", "&booking_key=gte." + dateKey(new Date(Date.now() - 14 * 86400000))), dbGet("cancelled_courses"), dbGet("substitutes"), dbGet("admin_notes"),
       ]);
       if (notesData && !editingNotes.current) { const nMap = {}; notesData.forEach(n => { nMap[n.date_key] = n.note; }); setAdminNotes(nMap); }
+      // Abgelaufene Gastkonten 30 Tage nach trial_expires automatisch loeschen (nur Admin, Marketing-Backup vorher)
+      if (membersData && user?.isAdmin) {
+        const grenze = dateKey(new Date(Date.now() - 30 * 86400000));
+        const alt = membersData.filter(m => !m.is_admin && m.account_type === "trial" && m.trial_expires && m.trial_expires < grenze);
+        for (const m of alt) {
+          await backupMarketingContact({ name: m.name, email: m.email, marketingConsent: m.marketing_consent, marketingConsentAt: m.marketing_consent_at });
+          await dbDelete("bookings", `member_id=eq.${encodeURIComponent(m.id)}`);
+          await dbDelete("members", `id=eq.${encodeURIComponent(m.id)}`);
+          logActivity("gast_geloescht", `${m.name}: Gastkonto 30 Tage nach Ablauf automatisch gelöscht`, m.name, m.id);
+        }
+        if (alt.length) { const ids = new Set(alt.map(m => m.id)); membersData = membersData.filter(m => !ids.has(m.id)); }
+      }
       if (membersData) {
         setAllMembers(membersData.map(m => ({ id: m.id, name: m.name, email: m.email, isAdmin: m.is_admin, online: m.online, birthday: m.birthday || "", goal: m.goal || "", health: m.health || "", weeklyGoal: m.weekly_goal || null, accountType: m.account_type || "member", trialExpires: m.trial_expires || null, question: m.question || "", fitnessLevel: m.fitness_level || null, avatarUrl: m.avatar_url || null, marketingConsent: m.marketing_consent || false, marketingConsentAt: m.marketing_consent_at || null })));
         const me = membersData.find(m => m.id === user?.id);
@@ -1689,27 +1796,22 @@ function App() {
         const today = new Date(); today.setHours(0,0,0,0);
         const weekEnd = new Date(today); weekEnd.setDate(today.getDate() + 7);
         const trialMembers = allMembers.filter(m => !m.isAdmin && m.accountType === "trial" && m.trialExpires);
+        // Nur laufende Probewochen anzeigen. Offizielles Ende = trial_expires minus 7 Tage.
+        // Ab dem Tag nach dem offiziellen Ende verschwindet die Frau aus der Liste,
+        // die weitere Betreuung laeuft ueber Brevo. Das Konto wird 30 Tage nach trial_expires automatisch geloescht.
         const expiringSoon = trialMembers.filter(m => {
           const exp = new Date(m.trialExpires); exp.setHours(0,0,0,0);
-          // 7 Tage offiziell: zeige an wenn Ablaufdatum minus 7 Tage <= heute (also offizielle Woche um oder bald um)
-          // Da trial_expires jetzt 14 Tage ist, ist "offizielle 7 Tage um" = trial_expires minus 7 Tage
           const officialEnd = new Date(exp); officialEnd.setDate(officialEnd.getDate() - 7);
-          // Nach oben: Ablauf steht bevor oder ist gerade um.
-          // Nach unten: laenger als 7 Tage komplett abgelaufen wird ausgeblendet,
-          // damit die Uebersicht nur zeigt, wo gerade etwas laeuft. Daten bleiben erhalten.
-          const tageSeitAblauf = Math.floor((today - exp) / 86400000);
-          return officialEnd <= weekEnd && tageSeitAblauf <= 7;
+          return officialEnd >= today;
         }).map(m => {
-          const exp = new Date(m.trialExpires);
+          const exp = new Date(m.trialExpires); exp.setHours(0,0,0,0);
           const officialEnd = new Date(exp); officialEnd.setDate(officialEnd.getDate() - 7);
-          const diffDays = Math.floor((officialEnd - today) / 86400000);
-          const hardBlock = Math.floor((exp - today) / 86400000);
+          const diffDays = Math.round((officialEnd - today) / 86400000);
           let status = "";
-          if (hardBlock <= 0) status = "🔴 Gesperrt";
-          else if (diffDays <= 0) status = "🟠 Gastzugang abgelaufen";
+          if (diffDays <= 0) status = "🟠 Letzter Tag";
           else if (diffDays <= 3) status = `⚠️ Noch ${diffDays} Tag${diffDays !== 1 ? "e" : ""}`;
           else status = `${diffDays} Tage übrig`;
-          return { ...m, status, diffDays, hardBlock };
+          return { ...m, status, diffDays };
         }).sort((a, b) => a.diffDays - b.diffDays);
         if (expiringSoon.length === 0) return null;
         return (
@@ -1765,7 +1867,9 @@ function App() {
           {calDates.map((date, di) => {
             const dayKey = DAYS_IDX[date.getDay()];
             const courses = getScheduleForDate(date)[dayKey] || [];
-            if (!courses.length) return null;
+            const feiertag = feiertagName(date);
+            const sonder = sonderplanFuer(date);
+            if (!courses.length && !feiertag && !sonder) return null;
             const today = isToday(date);
             const dk = dateKey(date);
             return (
@@ -1775,6 +1879,8 @@ function App() {
                   <span style={{ fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.9)" }}>{fmtShort(date)}</span>
                   {today && <span style={{ fontSize: "9px", fontWeight: 700, color: C.orange, background: C.white, padding: "2px 6px", borderRadius: "3px" }}>HEUTE</span>}
                 </div>
+                {feiertag && <FeiertagHinweis name={feiertag} text="Heute keine Kurse. Open Gym ist geöffnet!" />}
+                {!feiertag && sonder && <div style={{ fontSize: "10px", color: C.textMid, textAlign: "center", padding: "3px 0 5px" }}>{sonder.label}</div>}
                 {courses.map((c) => {
                   const bk = dk + "-" + c.id;
                   const list = bookings[bk] || [];
@@ -1826,7 +1932,9 @@ function App() {
               const massageSlots = getMassageForDate(date)[dayKey] || [];
               const hasSosExtra = (getSosExtraForDate(date)[dayKey] || []).length > 0;
               const hasZirkelSos = (getScheduleForDate(date)[dayKey] || []).some(c => c.trainer === "Eva");
-              if (!massageSlots.length && !hasSosExtra && !hasZirkelSos) return null;
+              const feiertag = feiertagName(date);
+              const pause = !feiertag && istBehandlungspause(date);
+              if (!massageSlots.length && !hasSosExtra && (!hasZirkelSos || pause) && !feiertag && !pause) return null;
               const today = isToday(date);
               const dk = dateKey(date);
               const dayFull = FULL_DAYS_IDX[date.getDay()];
@@ -1883,6 +1991,8 @@ function App() {
                     <span style={{ fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.9)" }}>{fmtShort(date)}</span>
                     {today && <span style={{ fontSize: "9px", fontWeight: 700, color: C.teal, background: C.white, padding: "2px 6px", borderRadius: "3px" }}>HEUTE</span>}
                   </div>
+                  {feiertag && <FeiertagHinweis name={feiertag} text="Heute keine Behandlungen. Open Gym ist geöffnet!" />}
+                  {pause && <FeiertagHinweis name="Zwischen den Jahren" text="Keine Behandlungen vom 24. bis 31. Dezember." />}
                   {allSlots.map((slot) => {
                     if (slot.type === "massage") {
                       const s = slot;
@@ -2104,6 +2214,8 @@ function App() {
                     <span style={{ fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.9)" }}>{fmtShort(date)}</span>
                     {today && <span style={{ fontSize: "9px", fontWeight: 700, color: C.warmBrown, background: C.white, padding: "2px 6px", borderRadius: "3px" }}>HEUTE</span>}
                   </div>
+                  {feiertagName(date) && <div style={{ fontSize: "10px", color: C.textMid, textAlign: "center", padding: "3px 0 5px" }}>{feiertagName(date)}: Open Gym ist geöffnet!</div>}
+                  {!feiertagName(date) && sonderplanFuer(date) && <div style={{ fontSize: "10px", color: C.textMid, textAlign: "center", padding: "3px 0 5px" }}>{sonderplanFuer(date).label}</div>}
                   {slots.map((s) => {
                     const bk = dk + "-" + s.id;
                     const list = bookings[bk] || [];
