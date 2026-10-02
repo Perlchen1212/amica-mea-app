@@ -10,6 +10,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
+@font-face { font-family: 'Speak'; src: url('SpeakPro-Heavy.woff2') format('woff2'), url('SpeakPro-Heavy.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SpeakTF'; src: url('SpeakTF-Regular.woff2') format('woff2'), url('SpeakTF-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 body { margin: 0; background: #e8e2db; }
 @media (min-width:500px){body{display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px 0}#root{width:430px;min-height:calc(100vh - 48px);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);position:relative;background:#F9F6F2}}
@@ -56,6 +58,7 @@ const logActivity = async (action, details, memberName = "", memberId = "") => {
 const C = { brandRed: "#3E2D28", brandOrange: "#C43A2A", white: "#FFFFFF", offWhite: "#FEFCFA", orange: "#f27900", orangeHover: "#d96b00", orangeLight: "#FFF0E3", darkBrown: "#3A2518", brown: "#5C3D2E", warmBrown: "#7A5443", red: "#C44B3F", redSoft: "#FDEAE8", redLight: "#FFF0EE", text: "#3D3D3D", textLight: "#6B6355", textMid: "#5A5248", border: "#F0EBE6", borderLight: "#F5F1ED", pageBg: "#F9F6F2", teal: "#2A7A6D", tealLight: "#E6F5F2", purple: "#7B5EA7", purpleLight: "#F3EFF8", green: "#2E7D32", greenLight: "#E8F5E9" };
 const FONT = `'Poppins', -apple-system, sans-serif`;
 const FONT_DISPLAY = `'Playfair Display', Georgia, serif`;
+const FONT_SPEAK = `'Speak', 'SpeakTF', Georgia, serif`;
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 const MONTHS_DE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const getDays = (offset) => { const today = new Date(); today.setHours(0,0,0,0); const days = []; for (let i = offset * 7; i < offset * 7 + 7; i++) { const d = new Date(today); d.setDate(today.getDate() + i); days.push(d); } return days; };
@@ -502,7 +505,7 @@ const OnlineUpsell = () => (
     <div style={{ background: C.orangeLight, borderRadius: "10px", padding: "14px 18px", maxWidth: "280px", margin: "0 auto" }}>
       <p style={{ fontSize: "13px", fontWeight: 600, color: C.orange, margin: "0 0 2px" }}>Interesse?</p>
       <p style={{ fontSize: "12px", color: C.darkBrown, margin: 0, lineHeight: 1.4 }}>Möchtest du Mitglied im amica mea Onlinebereich werden? Sprich einfach Eva an!</p>
-      <a href="tel:+491778859559" style={{ fontSize: "11px", color: C.textLight, margin: "6px 0 0", textDecoration: "underline", textUnderlineOffset: "2px", display: "block" }}>📞 0177 8859559</a>
+      <a href="https://wa.me/491778859559" target="_blank" rel="noopener" style={{ fontSize: "11px", color: C.orange, fontWeight: 600, margin: "6px 0 0", textDecoration: "none", display: "block" }}>💬 Schreib Eva eine WhatsApp</a>
     </div>
   </div>
 );
@@ -974,7 +977,7 @@ const ImpressumContent = () => (
     <p style={{ fontWeight: 700, marginBottom: "6px" }}>Angaben gemäß § 5 TMG</p>
     <p>Eva Böhner<br />amica mea – das Fitnessloft für Frauen<br />Waltherstraße 49-51<br />51069 Köln-Dellbrück</p>
     <p style={{ fontWeight: 700, marginTop: "10px", marginBottom: "4px" }}>Kontakt</p>
-    <p>Telefon: 0177 8859559<br />E-Mail: eva@amicamea.de<br />Website: amicamea.de</p>
+    <p>Telefon: 0221 92 23 28 82<br />E-Mail: eva@amicamea.de<br />Website: amicamea.de</p>
     <p style={{ fontWeight: 700, marginTop: "10px", marginBottom: "4px" }}>Verantwortlich für den Inhalt</p>
     <p>Eva Böhner (Anschrift wie oben)</p>
     <p style={{ fontWeight: 700, marginTop: "10px", marginBottom: "4px" }}>Streitschlichtung</p>
@@ -1160,27 +1163,24 @@ function LoginScreen({ onLogin }) {
   }
   if (screen === "welcome") {
     return (
-      <div style={{ maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: "#F9F6F2", fontFamily: FONT, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "10vh 9% 8vh" }}>
-        <div style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "2vh" }}>
-          <div style={{ display: "inline-block" }}>
-            <div style={{ textAlign: "left" }}>
-              <span style={{ fontSize: "clamp(30px, 9vw, 40px)", fontWeight: 300, color: "#3E2D28", fontFamily: FONT_DISPLAY, letterSpacing: "1.5px" }}>amica </span>
-              <span style={{ fontSize: "clamp(30px, 9vw, 40px)", fontWeight: 400, color: "#C43A2A", fontFamily: FONT_DISPLAY, letterSpacing: "1.5px" }}>mea</span>
-            </div>
-            <p style={{ fontSize: "clamp(9px, 2.5vw, 11px)", color: "#3E2D28", margin: "-9px 0 0", fontWeight: 400, fontFamily: FONT_DISPLAY, textAlign: "right", paddingRight: "1px" }}>das Fitnessloft für Frauen</p>
-          </div>
+      <div style={{ maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: "#F9F6F2", fontFamily: FONT, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* Logo als Siegel, rechts oben leicht ueber den Rand */}
+        <div style={{ flex: "0 0 auto", display: "flex", justifyContent: "center", paddingTop: "6vh" }}><img src="logo.webp" alt="amica mea, das Fitnessloft für Frauen" style={{ width: "min(64vw, 270px)", height: "auto", display: "block" }} /></div>
+        <div style={{ flex: "1 1 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "2vh 9% 0", position: "relative", zIndex: 1 }}>
+          <div style={{ width: "34px", height: "3px", background: "#F27900", borderRadius: "2px", marginBottom: "16px" }} />
+          <h2 style={{ fontSize: "clamp(38px, 11.5vw, 54px)", fontWeight: 400, color: "#4A3832", margin: 0, lineHeight: 1.02, fontFamily: FONT_SPEAK, letterSpacing: "-0.5px" }}>Stärke<br />dich selbst.</h2>
+          <p style={{ fontSize: "clamp(15px, 4.2vw, 19px)", color: "#4A3832", opacity: 0.7, margin: "18px 0 0", lineHeight: 1.5, fontWeight: 400, fontFamily: FONT_SPEAK, maxWidth: "none" }}>Du hast wenig Zeit.<br />Magst keine Fitnessstudios.<br />Erkennst aber langsam,<br />dass du mal wieder was tun solltest.</p>
+          <p style={{ fontSize: "clamp(15px, 4.2vw, 19px)", color: "#4A3832", margin: "14px 0 0", lineHeight: 1.5, fontWeight: 400, fontFamily: FONT_SPEAK }}>Teste uns, bevor deine<br />Orthopädin dich schickt.</p>
         </div>
-        <div style={{ flex: "1 1 auto", display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center", padding: "0 4%", minHeight: "30vh" }}>
-          <h2 style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: 600, color: "#4A3832", margin: "0 0 24px", lineHeight: 1.2, fontFamily: FONT_DISPLAY }}>Stärke dich selbst.</h2>
-          <p style={{ fontSize: "clamp(14px, 4vw, 18px)", color: "#4A3832", opacity: 0.55, margin: "0", lineHeight: 1.5, fontWeight: 300, maxWidth: "300px", marginLeft: "auto", marginRight: "auto" }}>Trainiere in einer Atmosphäre,<br />die dich wachsen lässt.</p>
-        </div>
-        <div style={{ flex: "0 0 auto", width: "82%", maxWidth: "340px", display: "flex", flexDirection: "column", gap: "14px", paddingBottom: "2vh" }}>
-          <button onClick={() => { setScreen("login"); setError(""); }} style={{ width: "100%", padding: "13px 20px", background: "transparent", color: "#4A3832", border: "1.5px solid #3B2A2620", borderRadius: "14px", fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, cursor: "pointer", fontFamily: FONT }}>👋 Willkommen zurück! Hier einloggen!</button>
-          <button onClick={() => { setScreen("register"); setError(""); }} style={{ width: "100%", padding: "16px 20px", background: "#4A3832", color: "#FFFFFF", border: "none", borderRadius: "14px", cursor: "pointer", fontFamily: FONT, textAlign: "center" }}>
-            <span style={{ display: "block", fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600 }}>✨ Lerne unsere Community kennen!</span>
-            <span style={{ display: "block", fontSize: "clamp(9px, 2.3vw, 11px)", fontWeight: 400, opacity: 0.7, marginTop: "3px" }}>7 Tage kostenlos im Studio & zuhause trainieren!</span>
+        <div style={{ flex: "0 0 auto", padding: "28px 9% 3vh", display: "flex", flexDirection: "column", gap: "10px", position: "relative", zIndex: 1 }}>
+          <button onClick={() => { setScreen("register"); setError(""); }} style={{ width: "100%", padding: "16px 20px", background: "#DF6F05", color: "#FFFFFF", border: "none", borderRadius: "14px", cursor: "pointer", fontFamily: FONT, textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 6px 18px rgba(223,111,5,0.22)" }}>
+            <span>
+              <span style={{ display: "block", fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600 }}>Eine Woche unser Training testen!</span>
+              <span style={{ display: "block", fontSize: "clamp(9px, 2.3vw, 11px)", fontWeight: 400, opacity: 0.85, marginTop: "3px" }}>Deine Probewoche hier starten – ganz ohne Verpflichtung.</span>
+            </span>
           </button>
-          <LegalLinks style={{ marginTop: "8px" }} />
+          <button onClick={() => { setScreen("login"); setError(""); }} style={{ width: "100%", padding: "12px 20px", background: "transparent", color: "#4A3832", border: "none", fontSize: "clamp(12px, 3.2vw, 14px)", fontWeight: 500, cursor: "pointer", fontFamily: FONT, textDecoration: "underline", textUnderlineOffset: "3px", opacity: 0.8 }}>Schon dabei? Hier einloggen</button>
+          <LegalLinks style={{ marginTop: "2px" }} />
         </div>
       </div>
     );
@@ -1190,17 +1190,12 @@ function LoginScreen({ onLogin }) {
       <div style={{ maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: "#F9F6F2", fontFamily: FONT }}>
         <div style={{ padding: "max(28px, env(safe-area-inset-top)) 28px 28px" }}>
           <button onClick={() => { setScreen("welcome"); setError(""); }} style={{ background: "none", border: "none", fontSize: "14px", color: "#3B2A26", opacity: 0.4, cursor: "pointer", fontFamily: FONT, padding: "4px 0", marginBottom: "24px" }}>← Zurück</button>
-          <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <div style={{ display: "inline-block" }}>
-              <div><span style={{ fontSize: "28px", fontWeight: 300, color: "#3E2D28", fontFamily: FONT_DISPLAY, letterSpacing: "1px" }}>amica </span><span style={{ fontSize: "28px", fontWeight: 400, color: "#C43A2A", fontFamily: FONT_DISPLAY, letterSpacing: "1px" }}>mea</span></div>
-              <p style={{ fontSize: "9px", color: "#3E2D28", margin: "-7px 0 0", fontWeight: 400, fontFamily: FONT_DISPLAY, textAlign: "right" }}>das Fitnessloft für Frauen</p>
-            </div>
-            <div style={{ background: C.white, borderRadius: "14px", padding: "16px 20px", border: `1.5px solid ${C.orange}30`, marginTop: "16px", textAlign: "center" }}>
-              <div style={{ fontSize: "28px", marginBottom: "4px" }}>🎁</div>
-              <p style={{ fontSize: "18px", fontWeight: 700, color: C.orange, margin: "0 0 4px" }}>7 Tage kostenlos</p>
-              <p style={{ fontSize: "14px", color: C.darkBrown, margin: 0, lineHeight: 1.4 }}>im Studio & zuhause trainieren!</p>
-            </div>
-            <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.55, margin: "12px 0 0", lineHeight: 1.5, textAlign: "center" }}>Melde dich an und finde heraus, ob wir zu dir passen.</p>
+          <div style={{ marginBottom: "26px" }}>
+            <img src="logo.webp" alt="amica mea, das Fitnessloft für Frauen" style={{ width: "96px", height: "auto", display: "block", margin: "0 auto 18px" }} />
+            <div style={{ width: "34px", height: "3px", background: "#DF6F05", borderRadius: "2px", marginBottom: "12px" }} />
+            <h2 style={{ fontSize: "clamp(28px, 8vw, 36px)", fontWeight: 400, color: "#4A3832", margin: 0, lineHeight: 1.05, fontFamily: FONT_SPEAK }}>Deine Probewoche.</h2>
+            <p style={{ fontSize: "clamp(15px, 4vw, 17px)", color: "#4A3832", opacity: 0.7, margin: "12px 0 0", lineHeight: 1.5, fontFamily: FONT_SPEAK }}>Eine Woche unser Training testen –<br />ganz ohne Verpflichtung.</p>
+            <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.55, margin: "12px 0 0", lineHeight: 1.5 }}>Kurz ausfüllen, dann kannst du direkt deinen ersten Kurs buchen.</p>
           </div>
           {[{ l: "Vorname *", v: regName, s: setRegName, p: "Dein Vorname", t: "text" },
             { l: "Nachname *", v: regLastName, s: setRegLastName, p: "Dein Nachname", t: "text" },
@@ -1213,17 +1208,22 @@ function LoginScreen({ onLogin }) {
               {f.t === "pin" ? (
                 <div style={{ position: "relative" }}>
                   <input type={showPin ? "text" : "password"} value={f.v} onChange={(e) => f.s(e.target.value)} placeholder={f.p} autoComplete="off" style={{ ...inputStyle, paddingRight: "40px" }}
-                    onFocus={(e) => e.target.style.borderColor = "#C43A2A"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
+                    onFocus={(e) => e.target.style.borderColor = "#DF6F05"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
                   <button onClick={() => setShowPin(!showPin)} style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "16px", cursor: "pointer", opacity: 0.5, padding: "4px" }}>{showPin ? "🙈" : "👁️"}</button>
                 </div>
               ) : (
                 <input type={f.t} value={f.v} onChange={(e) => f.s(e.target.value)} placeholder={f.p} style={inputStyle}
-                  onFocus={(e) => e.target.style.borderColor = "#C43A2A"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
+                  onFocus={(e) => e.target.style.borderColor = "#DF6F05"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
               )}
             </div>
           ))}
-          <button onClick={tryRegister} disabled={loading} style={{ width: "100%", padding: "16px", background: "#4A3832", color: "#FFFFFF", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 600, cursor: "pointer", fontFamily: FONT, opacity: loading ? 0.6 : 1 }}>{loading ? "Wird registriert..." : "Registrieren"}</button>
-          <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.45, textAlign: "center", marginTop: "16px" }}>Schon registriert? <button onClick={() => { setScreen("login"); setError(""); }} style={{ background: "none", border: "none", color: "#C43A2A", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Hier einloggen</button></p>
+          <button onClick={tryRegister} disabled={loading} style={{ width: "100%", padding: "16px", background: "#DF6F05", color: "#FFFFFF", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 600, cursor: "pointer", fontFamily: FONT, opacity: loading ? 0.6 : 1 }}>{loading ? "Wird registriert..." : "Probewoche starten!"}</button>
+          <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.45, textAlign: "center", marginTop: "16px" }}>Schon registriert? <button onClick={() => { setScreen("login"); setError(""); }} style={{ background: "none", border: "none", color: "#DF6F05", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Hier einloggen</button></p>
+          <div style={{ textAlign: "center", marginTop: "28px", padding: "16px 0 0", borderTop: "1px solid #3B2A260A" }}>
+            <p style={{ fontSize: "11px", color: "#3B2A26", opacity: 0.45, margin: "0 0 4px" }}>Fragen vorab? <a href="https://wa.me/491778859559" target="_blank" rel="noopener" style={{ color: "#DF6F05", fontWeight: 600, textDecoration: "none" }}>Schreib Eva eine WhatsApp.</a></p>
+            <p style={{ fontSize: "11px", color: "#3B2A26", opacity: 0.45, margin: 0 }}>Telefon <a href="tel:+4922192232882" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>0221 92 23 28 82</a> · <a href="https://maps.google.com/?q=Waltherstraße+49-51,+51069+Köln-Dellbrück" target="_blank" rel="noopener" style={{ color: "inherit", textDecoration: "none" }}>Waltherstraße 49-51, Köln-Dellbrück</a></p>
+            <LegalLinks style={{ marginTop: "10px", opacity: 0.5 }} />
+          </div>
         </div>
       </div>
     );
@@ -1232,40 +1232,37 @@ function LoginScreen({ onLogin }) {
     <div style={{ maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: "#F9F6F2", fontFamily: FONT }}>
       <div style={{ padding: "max(28px, env(safe-area-inset-top)) 28px 28px" }}>
         <button onClick={() => { setScreen("welcome"); setError(""); }} style={{ background: "none", border: "none", fontSize: "14px", color: "#3B2A26", opacity: 0.4, cursor: "pointer", fontFamily: FONT, padding: "4px 0", marginBottom: "24px" }}>← Zurück</button>
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ display: "inline-block" }}>
-            <div><span style={{ fontSize: "24px", fontWeight: 300, color: "#3E2D28", fontFamily: FONT_DISPLAY, letterSpacing: "1px" }}>amica </span><span style={{ fontSize: "24px", fontWeight: 400, color: "#C43A2A", fontFamily: FONT_DISPLAY, letterSpacing: "1px" }}>mea</span></div>
-            <p style={{ fontSize: "9px", color: "#3E2D28", margin: "-7px 0 0", fontWeight: 400, fontFamily: FONT_DISPLAY, textAlign: "right" }}>das Fitnessloft für Frauen</p>
-          </div>
-          <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.45, margin: "20px 0 0" }}>Melde dich in deinem Konto an</p>
+        <div style={{ marginBottom: "30px" }}>
+          <img src="logo.webp" alt="amica mea, das Fitnessloft für Frauen" style={{ width: "96px", height: "auto", display: "block", margin: "0 auto 18px" }} />
+          <div style={{ width: "34px", height: "3px", background: "#DF6F05", borderRadius: "2px", marginBottom: "12px" }} />
+          <h2 style={{ fontSize: "clamp(28px, 8vw, 36px)", fontWeight: 400, color: "#4A3832", margin: 0, lineHeight: 1.05, fontFamily: FONT_SPEAK }}>Willkommen zurück.</h2>
+          <p style={{ fontSize: "13px", color: "#3B2A26", opacity: 0.55, margin: "10px 0 0" }}>Melde dich in deinem Konto an.</p>
         </div>
         <div style={{ marginBottom: "14px" }}>
           <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#3B2A26", opacity: 0.6, marginBottom: "6px" }}>E-Mail</label>
           <input value={email} onChange={(e) => setEmail(e.target.value.toLowerCase())} placeholder="deine@email.de" style={inputStyle}
-            onFocus={(e) => e.target.style.borderColor = "#C43A2A"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
+            onFocus={(e) => e.target.style.borderColor = "#DF6F05"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"} />
         </div>
         <div style={{ marginBottom: "18px" }}>
           <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#3B2A26", opacity: 0.6, marginBottom: "6px" }}>PIN</label>
           <div style={{ position: "relative" }}>
             <input type={showPin ? "text" : "password"} value={pin} onChange={(e) => setPin(e.target.value)} placeholder="****" autoComplete="off" style={{ ...inputStyle, paddingRight: "40px" }}
-              onFocus={(e) => e.target.style.borderColor = "#C43A2A"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"}
+              onFocus={(e) => e.target.style.borderColor = "#DF6F05"} onBlur={(e) => e.target.style.borderColor = "#3B2A2615"}
               onKeyDown={(e) => e.key === "Enter" && tryLogin()} />
             <button onClick={() => setShowPin(!showPin)} style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", fontSize: "16px", cursor: "pointer", opacity: 0.5, padding: "4px" }}>{showPin ? "🙈" : "👁️"}</button>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
-          <div onClick={() => setRememberMe(!rememberMe)} style={{ width: "20px", height: "20px", borderRadius: "5px", border: rememberMe ? "none" : "2px solid #3B2A2625", background: rememberMe ? "#C43A2A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+          <div onClick={() => setRememberMe(!rememberMe)} style={{ width: "20px", height: "20px", borderRadius: "5px", border: rememberMe ? "none" : "2px solid #3B2A2625", background: rememberMe ? "#DF6F05" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
             {rememberMe && <span style={{ color: "#fff", fontSize: "12px", fontWeight: 700 }}>✓</span>}
           </div>
           <span onClick={() => setRememberMe(!rememberMe)} style={{ fontSize: "12px", color: "#3B2A26", opacity: 0.6, cursor: "pointer" }}>Angemeldet bleiben</span>
         </div>
         {error && <p style={{ fontSize: "11px", color: "#C43A2A", marginBottom: "8px" }}>{error}</p>}
         <button onClick={tryLogin} disabled={loading} style={{ width: "100%", padding: "15px", background: "#4A3832", color: "#FFFFFF", border: "none", borderRadius: "14px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT, opacity: loading ? 0.6 : 1 }}>{loading ? "Wird eingeloggt..." : "Anmelden"}</button>
-        <p style={{ fontSize: "11px", color: "#3B2A26", opacity: 0.35, textAlign: "center", marginTop: "16px" }}>Noch kein Konto? <button onClick={() => { setScreen("register"); setError(""); }} style={{ background: "none", border: "none", color: "#C43A2A", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Jetzt registrieren</button></p>
-        <div style={{ textAlign: "center", marginTop: "32px", padding: "16px 0", borderTop: "1px solid #3B2A260A" }}>
-          <a href="https://maps.google.com/?q=Waltherstraße+49-51,+51069+Köln-Dellbrück" target="_blank" rel="noopener" style={{ fontSize: "10px", color: "#3B2A26", opacity: 0.3, textDecoration: "none", display: "block" }}>📍 Waltherstraße 49-51 · 51069 Köln-Dellbrück</a>
-          <p style={{ fontSize: "10px", color: "#3B2A26", opacity: 0.3 }}><a href="tel:+491778859559" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>📞 0177 8859559</a> · <a href="https://amicamea.de" target="_blank" rel="noopener" style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "2px" }}>amicamea.de</a></p>
-          <LegalLinks style={{ marginTop: "8px", opacity: 0.5 }} />
+        <p style={{ fontSize: "11px", color: "#3B2A26", opacity: 0.55, textAlign: "center", marginTop: "16px" }}>Noch kein Konto? <button onClick={() => { setScreen("register"); setError(""); }} style={{ background: "none", border: "none", color: "#DF6F05", fontSize: "11px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Probewoche starten</button></p>
+        <div style={{ textAlign: "center", marginTop: "32px", padding: "16px 0" }}>
+          <LegalLinks style={{ opacity: 0.5 }} />
         </div>
       </div>
     </div>
@@ -1787,7 +1784,6 @@ function App() {
             <h2 style={{ fontSize: "17px", fontWeight: 700, color: C.darkBrown, margin: "0 0 8px" }}>Deine Testwoche ist vorbei</h2>
             <p style={{ fontSize: "12px", color: C.textMid, lineHeight: 1.5, margin: "0 0 14px" }}>Du hast Amica Mea 7 Tage lang erlebt. Wenn es dir gefallen hat, melde dich bei Eva — sie freut sich auf dich!</p>
             <a href="https://wa.me/491778859559" target="_blank" rel="noopener" style={{ display: "block", width: "100%", padding: "12px", background: C.orange, color: C.white, border: "none", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: FONT, textDecoration: "none", textAlign: "center", marginBottom: "8px" }}>📱 Eva per WhatsApp schreiben</a>
-            <a href="tel:+491778859559" style={{ fontSize: "11px", color: C.textLight, textDecoration: "underline", textUnderlineOffset: "2px" }}>Oder anrufen: 0177 8859559</a>
           </div>
         </div>
       )}
@@ -2836,7 +2832,7 @@ function App() {
             </>)}
           </div>
           <div style={{ background: C.white, borderRadius: "9px", padding: "10px 12px", border: `1px solid ${C.border}`, marginBottom: "10px" }}>
-            {[{ i: "📍", t: "Waltherstr. 49-51, Köln-Dellbrück" }, { i: "📞", t: "0177 8859559" }, { i: "🌐", t: "amicamea.de" }].map((x, i) => (
+            {[{ i: "📍", t: "Waltherstr. 49-51, Köln-Dellbrück" }, { i: "📞", t: "0221 92 23 28 82" }, { i: "🌐", t: "amicamea.de" }].map((x, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "3px 0", borderTop: i > 0 ? `1px solid ${C.borderLight}` : "none", fontSize: "11px", color: C.text }}><span>{x.i}</span><span>{x.t}</span></div>
             ))}
           </div>
