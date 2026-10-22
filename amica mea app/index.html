@@ -34,6 +34,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = (table) => `${SUPABASE_URL}/rest/v1/${table}`;
 const H = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "return=representation" };
 const dbGet = async (table, q = "") => { try { const r = await fetch(sb(table) + "?select=*" + q, { headers: H }); return r.ok ? r.json() : []; } catch(e) { return []; } };
+// ─── HERKUNFT (?von=instagram etc.) merken, damit sie bei der Registrierung gespeichert wird ───
+const REG_QUELLE = (() => { try { const p = new URLSearchParams(window.location.search).get("von"); if (p) { const q = p.toLowerCase().slice(0, 40); localStorage.setItem("am_quelle", q); return q; } return localStorage.getItem("am_quelle") || null; } catch(e) { return null; } })();
 const dbInsert = async (table, data) => { try { const r = await fetch(sb(table), { method: "POST", headers: H, body: JSON.stringify(data) }); return r.ok ? r.json() : null; } catch(e) { return null; } };
 const resizeImage = (file) => new Promise((resolve) => { const img = new Image(); img.onload = () => { const maxW = 800; let w = img.width, h = img.height; if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; } const canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; canvas.getContext("2d").drawImage(img, 0, 0, w, h); canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.85); }; img.src = URL.createObjectURL(file); });
 const dbDelete = async (table, q) => { try { const r = await fetch(sb(table) + "?" + q, { method: "DELETE", headers: H }); return r.ok; } catch(e) { return false; } };
@@ -262,10 +264,10 @@ const SCHEDULE_AUG = {
     { id: 1107, time: "19:00", dur: 45, name: "Boost it!", trainer: "Eva", spots: 18, type: "zirkel" },
   ],
   Di: [
-    { id: 1201, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Eva", spots: 18, type: "zirkel" },
-    { id: 1208, time: "09:45", dur: 10, name: "Fußgymnastik Express", trainer: "Eva", spots: 18, type: "express" },
-    { id: 1202, time: "10:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Eva", spots: 18, type: "zirkel", mama: true },
-    { id: 1203, time: "10:45", dur: 10, name: "Beckenboden Express", trainer: "Eva", spots: 18, type: "express" },
+    { id: 1201, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Lilly oder Eva", spots: 18, type: "zirkel" },
+    { id: 1208, time: "09:45", dur: 10, name: "Fußgymnastik Express", trainer: "Lilly oder Eva", spots: 18, type: "express" },
+    { id: 1202, time: "10:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Lilly oder Eva", spots: 18, type: "zirkel", mama: true },
+    { id: 1203, time: "10:45", dur: 10, name: "Beckenboden Express", trainer: "Lilly oder Eva", spots: 18, type: "express" },
     { id: 1207, time: "16:00", dur: 45, name: "Richte Dich auf!", trainer: "Eva", spots: 18, type: "zirkel" },
     { id: 1204, time: "17:00", dur: 45, name: "Fight Club", trainer: "Eva", spots: 18, type: "zirkel" },
     { id: 1205, time: "18:00", dur: 55, name: "In Balance", trainer: "Eva", spots: 15, type: "frei" },
@@ -299,11 +301,20 @@ const SCHEDULE_AUG = {
   ],
   So: [{ id: 1701, time: "11:00", dur: 55, name: "Vinyasa Yoga", trainer: "Kathie", spots: 15, type: "frei" }],
 };
+// Ab 26. Oktober 2026: Langhanteltraining montags 18:00 und 18:30 (je 30 Min.) ersetzt Your Move!
+const LANGHANTEL_START = new Date(2026, 9, 26); // 26. Oktober 2026
+const SCHEDULE_OKT = { ...SCHEDULE_AUG, Mo: SCHEDULE_AUG.Mo.filter(c => c.id !== 1106).concat([
+  { id: 1109, time: "18:00", dur: 30, name: "Langhanteltraining", trainer: "Eva", spots: 9, type: "frei" },
+  { id: 1110, time: "18:30", dur: 30, name: "Langhanteltraining", trainer: "Eva", spots: 9, type: "frei" },
+]).sort((a, b) => a.time.localeCompare(b.time)) };
+// Ab 14. November 2026: Girls Club samstags 13:00 (Lilly), blockt das Open Gym um 13:00 automatisch
+const GIRLS_CLUB_START = new Date(2026, 10, 14); // 14. November 2026
+const SCHEDULE_NOV = { ...SCHEDULE_OKT, Sa: [...SCHEDULE_OKT.Sa, { id: 1605, time: "13:00", dur: 60, name: "Girls Club", trainer: "Lilly", spots: 12, type: "zirkel" }] };
 // Datumsbasierte Umschaltung: Ab 1. Mai 2026 gilt der neue Plan, ab 10. August 2026 der August-Plan
 const MAI_START = new Date(2026, 4, 1); // 1. Mai 2026
 const AUG_START = new Date(2026, 7, 10); // 10. August 2026
-const getScheduleForDate = (d) => istFeiertag(d) ? LEERER_PLAN : sonderplanFuer(d) ? { [DAYS_IDX[d.getDay()]]: sonderplanFuer(d).kurse } : d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
-const SCHEDULE = (() => { const now = new Date(); return now >= AUG_START ? SCHEDULE_AUG : now >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD; })();
+const getScheduleForDate = (d) => istFeiertag(d) ? LEERER_PLAN : sonderplanFuer(d) ? { [DAYS_IDX[d.getDay()]]: sonderplanFuer(d).kurse } : d >= GIRLS_CLUB_START ? SCHEDULE_NOV : d >= LANGHANTEL_START ? SCHEDULE_OKT : d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
+const SCHEDULE = (() => { const now = new Date(); return now >= GIRLS_CLUB_START ? SCHEDULE_NOV : now >= LANGHANTEL_START ? SCHEDULE_OKT : now >= AUG_START ? SCHEDULE_AUG : now >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD; })();
 const MASSAGE_OLD = {
   Di: [{ id: 801, time: "16:30" }, { id: 802, time: "20:00" }, { id: 803, time: "20:30" }],
   Mi: [{ id: 804, time: "08:00" }, { id: 805, time: "10:30" }],
@@ -400,15 +411,17 @@ const generateOpenGym = (schedule, massage) => {
 const OPEN_GYM_OLD = generateOpenGym(SCHEDULE_OLD, MASSAGE_OLD);
 const OPEN_GYM_NEW = generateOpenGym(SCHEDULE_NEW, MASSAGE_NEW);
 const OPEN_GYM_AUG = generateOpenGym(SCHEDULE_AUG, MASSAGE_AUG);
+const OPEN_GYM_OKT = generateOpenGym(SCHEDULE_OKT, MASSAGE_AUG);
+const OPEN_GYM_NOV = generateOpenGym(SCHEDULE_NOV, MASSAGE_AUG);
 // Feiertag: keine Kurse und Behandlungen, also alle Open-Gym-Stunden frei
 const OPEN_GYM_ALLE = generateOpenGym({}, {});
-const OPEN_GYM = (() => { const now = new Date(); return now >= AUG_START ? OPEN_GYM_AUG : now >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD; })();
+const OPEN_GYM = (() => { const now = new Date(); return now >= GIRLS_CLUB_START ? OPEN_GYM_NOV : now >= LANGHANTEL_START ? OPEN_GYM_OKT : now >= AUG_START ? OPEN_GYM_AUG : now >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD; })();
 const OPEN_GYM_SONDER_CACHE = {};
 const getOpenGymForDate = (d) => {
   if (istFeiertag(d)) return OPEN_GYM_ALLE;
   const sp = sonderplanFuer(d);
   if (sp) { const dk = dateKey(d); if (!OPEN_GYM_SONDER_CACHE[dk]) OPEN_GYM_SONDER_CACHE[dk] = generateOpenGym({ [DAYS_IDX[d.getDay()]]: sp.kurse }, {}); return OPEN_GYM_SONDER_CACHE[dk]; }
-  return d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
+  return d >= GIRLS_CLUB_START ? OPEN_GYM_NOV : d >= LANGHANTEL_START ? OPEN_GYM_OKT : d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
 };
 // ─── LOGO (Echtes Amica Mea Logo) ───
 const AmicaLogo = ({ size = 64 }) => (
@@ -1093,11 +1106,11 @@ function LoginScreen({ onLogin }) {
       const newId = "m" + Date.now();
       const trialExpires = new Date(); trialExpires.setDate(trialExpires.getDate() + 14);
       const trialExpiresStr = trialExpires.getFullYear() + "-" + String(trialExpires.getMonth()+1).padStart(2,"0") + "-" + String(trialExpires.getDate()).padStart(2,"0");
-      const result = await dbInsert("members", { id: newId, name: fullName, email: regEmail.toLowerCase(), pin: regPin, is_admin: false, online: false, birthday: regBirthday, account_type: "trial", trial_expires: trialExpiresStr, marketing_consent: false, marketing_consent_at: null });
+      const result = await dbInsert("members", { id: newId, name: fullName, email: regEmail.toLowerCase(), pin: regPin, is_admin: false, online: false, birthday: regBirthday, account_type: "trial", trial_expires: trialExpiresStr, marketing_consent: false, marketing_consent_at: null, quelle: REG_QUELLE });
       if (result && result.length > 0) {
         const userData = { id: newId, name: fullName, email: regEmail.toLowerCase(), isAdmin: false, online: false, accountType: "trial", trialExpires: trialExpiresStr };
         try { localStorage.setItem("amicamea_user", JSON.stringify(userData)); } catch(e) {}
-        logActivity("registrierung", `${fullName} hat sich registriert (Gast bis ${trialExpiresStr})`, fullName, newId);
+        logActivity("registrierung", `${fullName} hat sich registriert (Gast bis ${trialExpiresStr})${REG_QUELLE ? " · über " + REG_QUELLE : ""}`, fullName, newId);
         setShowPwaHelp(true);
       } else { setError("Registrierung fehlgeschlagen – bitte nochmal versuchen"); }
     } catch (e) { setError("Verbindungsfehler"); }
@@ -1167,10 +1180,9 @@ function LoginScreen({ onLogin }) {
         {/* Logo als Siegel, rechts oben leicht ueber den Rand */}
         <div style={{ flex: "0 0 auto", display: "flex", justifyContent: "center", paddingTop: "6vh" }}><img src="logo.webp" alt="amica mea, das Fitnessloft für Frauen" style={{ width: "min(64vw, 270px)", height: "auto", display: "block" }} /></div>
         <div style={{ flex: "1 1 auto", display: "flex", flexDirection: "column", justifyContent: "center", padding: "2vh 9% 0", position: "relative", zIndex: 1 }}>
-          <div style={{ width: "34px", height: "3px", background: "#F27900", borderRadius: "2px", marginBottom: "16px" }} />
           <h2 style={{ fontSize: "clamp(38px, 11.5vw, 54px)", fontWeight: 400, color: "#4A3832", margin: 0, lineHeight: 1.02, fontFamily: FONT_SPEAK, letterSpacing: "-0.5px" }}>Stärke<br />dich selbst.</h2>
           <p style={{ fontSize: "clamp(15px, 4.2vw, 19px)", color: "#4A3832", opacity: 0.7, margin: "18px 0 0", lineHeight: 1.5, fontWeight: 400, fontFamily: FONT_SPEAK, maxWidth: "none" }}>Du hast wenig Zeit.<br />Magst keine Fitnessstudios.<br />Erkennst aber langsam,<br />dass du mal wieder was tun solltest.</p>
-          <p style={{ fontSize: "clamp(15px, 4.2vw, 19px)", color: "#4A3832", margin: "14px 0 0", lineHeight: 1.5, fontWeight: 400, fontFamily: FONT_SPEAK }}>Teste uns, bevor deine<br />Orthopädin dich schickt.</p>
+          <p style={{ fontSize: "clamp(15px, 4.2vw, 19px)", color: "#4A3832", opacity: 0.7, margin: "14px 0 0", lineHeight: 1.5, fontWeight: 400, fontFamily: FONT_SPEAK }}>Teste uns, bevor deine Orthopädin<br />dich zu uns schickt.</p>
         </div>
         <div style={{ flex: "0 0 auto", padding: "28px 9% 3vh", display: "flex", flexDirection: "column", gap: "10px", position: "relative", zIndex: 1 }}>
           <button onClick={() => { setScreen("register"); setError(""); }} style={{ width: "100%", padding: "16px 20px", background: "#DF6F05", color: "#FFFFFF", border: "none", borderRadius: "14px", cursor: "pointer", fontFamily: FONT, textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 6px 18px rgba(223,111,5,0.22)" }}>
@@ -1390,7 +1402,7 @@ function App() {
         if (alt.length) { const ids = new Set(alt.map(m => m.id)); membersData = membersData.filter(m => !ids.has(m.id)); }
       }
       if (membersData) {
-        setAllMembers(membersData.map(m => ({ id: m.id, name: m.name, email: m.email, isAdmin: m.is_admin, online: m.online, birthday: m.birthday || "", goal: m.goal || "", health: m.health || "", weeklyGoal: m.weekly_goal || null, accountType: m.account_type || "member", trialExpires: m.trial_expires || null, question: m.question || "", fitnessLevel: m.fitness_level || null, avatarUrl: m.avatar_url || null, marketingConsent: m.marketing_consent || false, marketingConsentAt: m.marketing_consent_at || null })));
+        setAllMembers(membersData.map(m => ({ id: m.id, name: m.name, email: m.email, isAdmin: m.is_admin, online: m.online, birthday: m.birthday || "", goal: m.goal || "", health: m.health || "", weeklyGoal: m.weekly_goal || null, accountType: m.account_type || "member", trialExpires: m.trial_expires, quelle: m.quelle || null || null, question: m.question || "", fitnessLevel: m.fitness_level || null, avatarUrl: m.avatar_url || null, marketingConsent: m.marketing_consent || false, marketingConsentAt: m.marketing_consent_at || null })));
         const me = membersData.find(m => m.id === user?.id);
         if (me && !editingProfile.current) { setMyBirthday(me.birthday || ""); setMyGoal(me.goal || ""); setMyHealth(me.health || ""); setMyQuestion(me.question || ""); setMyWeeklyGoal(me.weekly_goal || null); setMyFitnessLevel(me.fitness_level || 3); }
       }
@@ -1820,7 +1832,7 @@ function App() {
               <div key={m.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.border}` }}>
                 <div>
                   <span style={{ fontSize: "11px", fontWeight: 600, color: C.darkBrown }}>{m.name}</span>
-                  <span style={{ fontSize: "9px", color: C.textLight, marginLeft: "6px" }}>{m.status}</span>
+                  <span style={{ fontSize: "9px", color: C.textLight, marginLeft: "6px" }}>{m.status}{m.quelle ? " · " + m.quelle : ""}</span>
                 </div>
                 <div style={{ display: "flex", gap: "4px" }}>
                   <button onClick={() => { toggleAccountType(m.id); }} style={{ background: C.orange, color: C.white, border: "none", borderRadius: "6px", padding: "3px 10px", fontSize: "9px", fontWeight: 700, cursor: "pointer", fontFamily: FONT }}>→ Mitglied</button>
@@ -3030,12 +3042,12 @@ function App() {
                   </div>
                 </div>
               ))}
-              <div style={{ fontSize: "11px", fontWeight: 600, color: C.orange, textTransform: "uppercase", letterSpacing: "1.5px", marginTop: "16px", marginBottom: "8px" }}>Freies Training</div>
+              <div style={{ fontSize: "11px", fontWeight: 600, color: C.orange, textTransform: "uppercase", letterSpacing: "1.5px", marginTop: "16px", marginBottom: "8px" }}>Girls Club</div>
               <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", padding: "8px 0" }}>
-                <span style={{ fontSize: "20px", minWidth: "28px", textAlign: "center" }}>🎯</span>
+                <span style={{ fontSize: "20px", minWidth: "28px", textAlign: "center" }}>✨</span>
                 <div>
-                  <div style={{ fontSize: "13px", fontWeight: 700, color: C.darkBrown }}>Your Move!</div>
-                  <div style={{ fontSize: "11px", color: C.textMid, lineHeight: 1.4, marginTop: "1px" }}>Dein Training, dein Tempo, dein Fokus. Individuell angeleitet.</div>
+                  <div style={{ fontSize: "13px", fontWeight: 700, color: C.darkBrown }}>Girls Club</div>
+                  <div style={{ fontSize: "11px", color: C.textMid, lineHeight: 1.4, marginTop: "1px" }}>Nur für Mädchen von 11 bis 15. Ein ausgewogenes Krafttraining an hydraulischen Geräten, kombiniert mit Pilates und Akrobatik. Das schult Aufrichtung, Körpergefühl und Koordination, ähnlich wie Turnen oder Ballett. Altersgerecht angeleitet von Lilly. Samstags um 13 Uhr, 60 Minuten, auch in der Ferienzeit.</div>
                 </div>
               </div>
               <div style={{ fontSize: "11px", fontWeight: 600, color: C.orange, textTransform: "uppercase", letterSpacing: "1.5px", marginTop: "16px", marginBottom: "8px" }}>Amica Mea Online</div>
@@ -3052,8 +3064,9 @@ function App() {
                 { emoji: "🧘‍♀️", name: "Pilates", desc: "Tiefe Muskeln, starke Mitte, bewusste Bewegung." },
                 { emoji: "🕉️", name: "Mindful Yoga", desc: "Atmen, spüren, ankommen." },
                 { emoji: "🌊", name: "Vinyasa Yoga", desc: "Fließende Bewegung, Kraft und Ruhe im Flow." },
+                { emoji: "🏋️‍♀️", name: "Langhanteltraining", desc: "Ganzkörpertraining mit der Langhantel: Beine, Po, Rücken, Brust, Schultern, Arme. 30 Minuten, du bestimmst dein Gewicht." },
               ].map((k, i) => (
-                <div key={i} style={{ display: "flex", gap: "10px", alignItems: "flex-start", padding: "8px 0", borderBottom: i < 3 ? `1px solid ${C.borderLight}` : "none" }}>
+                <div key={i} style={{ display: "flex", gap: "10px", alignItems: "flex-start", padding: "8px 0", borderBottom: i < 4 ? `1px solid ${C.borderLight}` : "none" }}>
                   <span style={{ fontSize: "20px", minWidth: "28px", textAlign: "center" }}>{k.emoji}</span>
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 700, color: C.darkBrown }}>{k.name}</div>

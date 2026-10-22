@@ -100,6 +100,12 @@
   <div id="aug-hinweis" style="display:none; max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
     ✨ Ab Montag, den 10. August, gilt unser aktualisierter Kursplan — alle Termine findest du wie immer in der App.
   </div>
+  <div data-until="2026-10-26" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
+    ✨ Neu ab Montag, den 26. Oktober: Langhanteltraining montags um 18:00 und 18:30 Uhr. Ab Samstag, den 14. November: Girls Club für Mädchen von 11 bis 15, samstags um 13:00 Uhr.
+  </div>
+  <div data-from="2026-10-26" data-until="2026-11-14" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
+    ✨ Neu ab Samstag, den 14. November: Girls Club für Mädchen von 11 bis 15, samstags um 13:00 Uhr.
+  </div>
 
   <div class="days-grid">
 
@@ -151,13 +157,29 @@
           </div>
           <div class="course-sub">Zirkeltraining</div>
         </div>
-        <div class="course">
+        <div class="course" data-until="2026-10-26">
           <div class="course-main">
             <span class="course-time">18:00</span>
             <span class="course-emoji">🎯</span>
             <span class="course-name">Your Move!</span>
           </div>
           <div class="course-sub">Freies Training</div>
+        </div>
+        <div class="course" data-from="2026-10-26">
+          <div class="course-main">
+            <span class="course-time">18:00</span>
+            <span class="course-emoji">🏋️‍♀️</span>
+            <span class="course-name">Langhanteltraining</span>
+          </div>
+          <div class="course-sub">30 Minuten · Training auf der Matte</div>
+        </div>
+        <div class="course" data-from="2026-10-26">
+          <div class="course-main">
+            <span class="course-time">18:30</span>
+            <span class="course-emoji">🏋️‍♀️</span>
+            <span class="course-name">Langhanteltraining</span>
+          </div>
+          <div class="course-sub">30 Minuten · Training auf der Matte</div>
         </div>
         <div class="course">
           <div class="course-main">
@@ -440,6 +462,14 @@
           </div>
           <div class="course-sub">Zirkeltraining</div>
         </div>
+        <div class="course" data-from="2026-11-14">
+          <div class="course-main">
+            <span class="course-time">13:00</span>
+            <span class="course-emoji">✨</span>
+            <span class="course-name">Girls Club</span>
+          </div>
+          <div class="course-sub">60 Minuten · Mädchen von 11 bis 15</div>
+        </div>
       </div>
     </div>
 
@@ -508,11 +538,25 @@
           <p>Schultern runter, Nacken frei, Verspannungen lösen.</p>
         </div>
       </div>
-      <div class="kursinfo-item">
+      <div class="kursinfo-item" data-until="2026-10-26">
         <span class="kursinfo-emoji">🎯</span>
         <div class="kursinfo-text">
           <h3>Your Move!</h3>
           <p>Dein Training, dein Tempo, dein Fokus. Individuell angeleitet.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">🏋️‍♀️</span>
+        <div class="kursinfo-text">
+          <h3>Langhanteltraining</h3>
+          <p>Ganzkörpertraining mit der Langhantel: Beine, Po, Rücken, Brust, Schultern, Arme. 30 Minuten, du bestimmst dein Gewicht.</p>
+        </div>
+      </div>
+      <div class="kursinfo-item">
+        <span class="kursinfo-emoji">✨</span>
+        <div class="kursinfo-text">
+          <h3>Girls Club</h3>
+          <p>Nur für Mädchen von 11 bis 15. Krafttraining an hydraulischen Geräten, kombiniert mit Pilates und Akrobatik. Das schult Aufrichtung, Körpergefühl und Koordination, ähnlich wie Turnen oder Ballett. Altersgerecht angeleitet von Lilly. Samstags um 13 Uhr, 60 Minuten, auch in der Ferienzeit.</p>
         </div>
       </div>
       <div class="kursinfo-item">
@@ -564,11 +608,19 @@
   // Datumsweiche: Ab 10. August 2026 gilt der neue Kursplan
   (function() {
     var AUG_START = new Date(2026, 7, 10);
-    var isAug = new Date() >= AUG_START;
+    var now = new Date();
+    var isAug = now >= AUG_START;
     document.querySelectorAll("[data-plan]").forEach(function(el) {
       el.style.display = (el.getAttribute("data-plan") === (isAug ? "aug" : "current")) ? "" : "none";
     });
     if (!isAug) document.getElementById("aug-hinweis").style.display = "block";
+    // Zeitgesteuerte Einträge: data-from="JJJJ-MM-TT" (ab diesem Tag sichtbar), data-until="JJJJ-MM-TT" (bis vor diesem Tag sichtbar)
+    var parse = function(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); };
+    document.querySelectorAll("[data-from], [data-until]").forEach(function(el) {
+      var from = el.getAttribute("data-from"), until = el.getAttribute("data-until");
+      var show = (!from || now >= parse(from)) && (!until || now < parse(until));
+      el.style.display = show ? "" : "none";
+    });
   })();
 </script>
 </body>
