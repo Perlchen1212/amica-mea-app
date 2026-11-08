@@ -103,8 +103,11 @@
   <div data-until="2026-10-26" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
     ✨ Neu ab Montag, den 26. Oktober: Langhanteltraining montags um 18:00 und 18:30 Uhr. Ab Samstag, den 14. November: Girls Club für Mädchen von 11 bis 15, samstags um 13:00 Uhr.
   </div>
-  <div data-from="2026-10-26" data-until="2026-11-14" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
-    ✨ Neu ab Samstag, den 14. November: Girls Club für Mädchen von 11 bis 15, samstags um 13:00 Uhr.
+  <div data-from="2026-10-26" data-until="2026-11-10" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
+    ✨ Neu ab Samstag, den 14. November: Girls Club für Mädchen von 11 bis 15, samstags um 13:00 Uhr. Ab Dienstag, den 10. November: Langhanteltraining auch dienstags um 16:30 Uhr, dazu kleine Änderungen am Vormittag (Montag ab 16. November).
+  </div>
+  <div data-from="2026-11-10" data-until="2026-11-16" style="max-width: 600px; margin: 0 auto 20px; padding: 12px 18px; background: #FBF5EF; border: 1px solid #f2790040; border-radius: 12px; text-align: center; font-size: 14px; color: #4e2c23;">
+    ✨ Ab Montag, den 16. November: Montagvormittag mit Lilly, die Studio Session wandert auf den Mittwoch (ab 18. November). Alle Termine wie immer aktuell in der App.
   </div>
 
   <div class="days-grid">
@@ -138,7 +141,15 @@
           </div>
           <div class="course-sub">10 Minuten</div>
         </div>
-        <div class="course" data-plan="aug" style="display:none">
+        <div class="course" data-from="2026-11-16">
+          <div class="course-main">
+            <span class="course-time">9:45</span>
+            <span class="course-emoji">⚡</span>
+            <span class="course-name">Stretching Express</span>
+          </div>
+          <div class="course-sub">10 Minuten</div>
+        </div>
+        <div class="course" data-plan="aug" data-until="2026-11-16" style="display:none">
           <div class="course-main">
             <span class="course-time">10:00</span>
             <span class="course-emoji">🎬</span>
@@ -221,7 +232,7 @@
           </div>
           <div class="course-sub">Zirkeltraining</div>
         </div>
-        <div class="course">
+        <div class="course" data-until="2026-11-10">
           <div class="course-main">
             <span class="course-time">10:45</span>
             <span class="course-emoji">⚡</span>
@@ -232,13 +243,21 @@
       </div>
       <div class="divider"></div>
       <div class="time-block">
-        <div class="course">
+        <div class="course" data-until="2026-11-10">
           <div class="course-main">
             <span class="course-time">16:00</span>
             <span class="course-emoji">🧱</span>
             <span class="course-name">Richte Dich auf!</span>
           </div>
           <div class="course-sub">Zirkeltraining</div>
+        </div>
+        <div class="course" data-from="2026-11-10">
+          <div class="course-main">
+            <span class="course-time">16:30</span>
+            <span class="course-emoji">🏋️‍♀️</span>
+            <span class="course-name">Langhanteltraining</span>
+          </div>
+          <div class="course-sub">30 Minuten · Training auf der Matte</div>
         </div>
         <div class="course">
           <div class="course-main">
@@ -288,7 +307,7 @@
           </div>
           <div class="course-sub">10 Minuten</div>
         </div>
-        <div class="course" data-plan="aug" style="display:none">
+        <div class="course" data-plan="aug" data-until="2026-11-10" style="display:none">
           <div class="course-main">
             <span class="course-time">9:45</span>
             <span class="course-emoji">⚡</span>
@@ -297,6 +316,14 @@
           <div class="course-sub">10 Minuten</div>
         </div>
         <div class="course" data-plan="current">
+          <div class="course-main">
+            <span class="course-time">10:00</span>
+            <span class="course-emoji">🎬</span>
+            <span class="course-name">Studio Session</span>
+          </div>
+          <div class="course-sub">30 Minuten · Freies Training</div>
+        </div>
+        <div class="course" data-from="2026-11-16">
           <div class="course-main">
             <span class="course-time">10:00</span>
             <span class="course-emoji">🎬</span>
@@ -619,6 +646,8 @@
     document.querySelectorAll("[data-from], [data-until]").forEach(function(el) {
       var from = el.getAttribute("data-from"), until = el.getAttribute("data-until");
       var show = (!from || now >= parse(from)) && (!until || now < parse(until));
+      var plan = el.getAttribute("data-plan");
+      if (plan && plan !== (isAug ? "aug" : "current")) show = false;
       el.style.display = show ? "" : "none";
     });
   })();

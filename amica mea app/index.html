@@ -146,6 +146,13 @@ const SONDERPLAN = {
     { id: 3902, time: "11:00", dur: 45, name: "Finale Furioso", trainer: "Eva", spots: 18, type: "zirkel" },
   ] },
   "2026-12-31": { label: "Silvester: Open Gym ist geöffnet!", kurse: [] },
+  "2026-11-28": { label: "Adventscafé: Schwitzen für Ori Bollerwagen, 14 Uhr", kurse: [
+    { id: 1601, time: "09:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Eva", spots: 18, type: "zirkel", mama: true },
+    { id: 1602, time: "09:45", dur: 10, name: "Fußgymnastik Express", trainer: "Eva", spots: 18, type: "express" },
+    { id: 1603, time: "10:00", dur: 45, name: "Mach Dich locker!", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 1604, time: "11:00", dur: 45, name: "Fight Club", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 6901, time: "14:00", dur: 30, name: "Schwitzen für Ori Bollerwagen", trainer: "Eva", spots: 25, type: "frei" },
+  ] },
 };
 const sonderplanFuer = (d) => SONDERPLAN[dateKey(d)] || null;
 // Behandlungspause: keine Behandlungen und SOS-Termine vom 24.12. bis 31.12.2026
@@ -309,12 +316,48 @@ const SCHEDULE_OKT = { ...SCHEDULE_AUG, Mo: SCHEDULE_AUG.Mo.filter(c => c.id !==
 ]).sort((a, b) => a.time.localeCompare(b.time)) };
 // Ab 14. November 2026: Girls Club samstags 13:00 (Lilly), blockt das Open Gym um 13:00 automatisch
 const GIRLS_CLUB_START = new Date(2026, 10, 14); // 14. November 2026
-const SCHEDULE_NOV = { ...SCHEDULE_OKT, Sa: [...SCHEDULE_OKT.Sa, { id: 1605, time: "13:00", dur: 60, name: "Girls Club", trainer: "Lilly", spots: 12, type: "zirkel" }] };
+// Girls Club (Sa 13:00, Lilly) ist nicht über die App buchbar, blockt aber das Open Gym
+const GIRLS_CLUB_BLOCK = { id: 1605, time: "13:00", dur: 60, name: "Girls Club", trainer: "Lilly", spots: 0, type: "zirkel" };
+const mitGirlsClub = (s) => ({ ...s, Sa: [...s.Sa, GIRLS_CLUB_BLOCK] });
+const SCHEDULE_NOV = SCHEDULE_OKT;
+// Neuer Dienstplan: Dienstag/Mittwoch ab 10.11.2026, Montag ab 16.11.2026
+const NEUPLAN_START = new Date(2026, 10, 10); // 10. November 2026 (Dienstag)
+const NEUPLAN_MO_START = new Date(2026, 10, 16); // 16. November 2026 (Montag)
+const SCHEDULE_NOV10 = { ...SCHEDULE_NOV,
+  Di: [
+    { id: 1201, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Lilly", spots: 18, type: "zirkel" },
+    { id: 1208, time: "09:45", dur: 10, name: "Fußgymnastik Express", trainer: "Lilly", spots: 18, type: "express" },
+    { id: 1202, time: "10:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Lilly", spots: 18, type: "zirkel", mama: true },
+    { id: 1209, time: "16:30", dur: 30, name: "Langhanteltraining", trainer: "Eva", spots: 9, type: "frei" },
+    { id: 1204, time: "17:00", dur: 45, name: "Fight Club", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 1205, time: "18:00", dur: 55, name: "In Balance", trainer: "Eva", spots: 15, type: "frei" },
+  ],
+  Mi: [
+    { id: 1301, time: "08:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 1302, time: "09:00", dur: 45, name: "Richte Dich auf!", trainer: "Eva", spots: 18, type: "zirkel", mama: true },
+    { id: 1304, time: "17:00", dur: 45, name: "Boost it!", trainer: "Lilly", spots: 18, type: "zirkel" },
+    { id: 1305, time: "18:00", dur: 55, name: "Pilates", trainer: "Lilly", spots: 15, type: "frei" },
+    { id: 1306, time: "19:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Lilly", spots: 18, type: "zirkel" },
+    { id: 1307, time: "19:45", dur: 10, name: "Stretching Express", trainer: "Lilly", spots: 18, type: "express" },
+  ],
+};
+const SCHEDULE_NOV16 = { ...SCHEDULE_NOV10,
+  Mi: [...SCHEDULE_NOV10.Mi.slice(0, 2), { id: 1308, time: "10:00", dur: 30, name: "Studio Session", trainer: "Eva", spots: 8, type: "frei" }, ...SCHEDULE_NOV10.Mi.slice(2)],
+  Mo: [
+    { id: 1101, time: "08:00", dur: 45, name: "Boost it!", trainer: "Lilly", spots: 18, type: "zirkel" },
+    { id: 1102, time: "09:00", dur: 45, name: "Zeit für mich", trainer: "Lilly", spots: 18, type: "zirkel", mama: true },
+    { id: 1111, time: "09:45", dur: 10, name: "Stretching Express", trainer: "Lilly", spots: 18, type: "express" },
+    { id: 1105, time: "17:00", dur: 45, name: "Stärke Dich selbst!", trainer: "Eva", spots: 18, type: "zirkel" },
+    { id: 1109, time: "18:00", dur: 30, name: "Langhanteltraining", trainer: "Eva", spots: 9, type: "frei" },
+    { id: 1110, time: "18:30", dur: 30, name: "Langhanteltraining", trainer: "Eva", spots: 9, type: "frei" },
+    { id: 1107, time: "19:00", dur: 45, name: "Boost it!", trainer: "Eva", spots: 18, type: "zirkel" },
+  ],
+};
 // Datumsbasierte Umschaltung: Ab 1. Mai 2026 gilt der neue Plan, ab 10. August 2026 der August-Plan
 const MAI_START = new Date(2026, 4, 1); // 1. Mai 2026
 const AUG_START = new Date(2026, 7, 10); // 10. August 2026
-const getScheduleForDate = (d) => istFeiertag(d) ? LEERER_PLAN : sonderplanFuer(d) ? { [DAYS_IDX[d.getDay()]]: sonderplanFuer(d).kurse } : d >= GIRLS_CLUB_START ? SCHEDULE_NOV : d >= LANGHANTEL_START ? SCHEDULE_OKT : d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
-const SCHEDULE = (() => { const now = new Date(); return now >= GIRLS_CLUB_START ? SCHEDULE_NOV : now >= LANGHANTEL_START ? SCHEDULE_OKT : now >= AUG_START ? SCHEDULE_AUG : now >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD; })();
+const getScheduleForDate = (d) => istFeiertag(d) ? LEERER_PLAN : sonderplanFuer(d) ? { [DAYS_IDX[d.getDay()]]: sonderplanFuer(d).kurse } : d >= NEUPLAN_MO_START ? SCHEDULE_NOV16 : d >= NEUPLAN_START ? SCHEDULE_NOV10 : d >= GIRLS_CLUB_START ? SCHEDULE_NOV : d >= LANGHANTEL_START ? SCHEDULE_OKT : d >= AUG_START ? SCHEDULE_AUG : d >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD;
+const SCHEDULE = (() => { const now = new Date(); return now >= NEUPLAN_MO_START ? SCHEDULE_NOV16 : now >= NEUPLAN_START ? SCHEDULE_NOV10 : now >= GIRLS_CLUB_START ? SCHEDULE_NOV : now >= LANGHANTEL_START ? SCHEDULE_OKT : now >= AUG_START ? SCHEDULE_AUG : now >= MAI_START ? SCHEDULE_NEW : SCHEDULE_OLD; })();
 const MASSAGE_OLD = {
   Di: [{ id: 801, time: "16:30" }, { id: 802, time: "20:00" }, { id: 803, time: "20:30" }],
   Mi: [{ id: 804, time: "08:00" }, { id: 805, time: "10:30" }],
@@ -334,8 +377,16 @@ const MASSAGE_AUG = {
   Fr: [{ id: 1806, time: "11:00" }],
   Sa: [{ id: 810, time: "08:00" }, { id: 811, time: "08:30" }, { id: 812, time: "12:00" }, { id: 813, time: "12:30" }],
 };
-const MASSAGE = (() => { const now = new Date(); return now >= AUG_START ? MASSAGE_AUG : now >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD; })();
-const getMassageForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= AUG_START ? MASSAGE_AUG : d >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD;
+// Behandlungstermine ab 16.11.2026 (neuer Dienstplan): ein Termin vor bzw. nach der Schicht
+const MASSAGE_NOV = {
+  Mo: [{ id: 2804, time: "20:00" }, { id: 2805, time: "20:30" }],
+  Di: [{ id: 2809, time: "16:00" }, { id: 1802, time: "19:00" }, { id: 1803, time: "19:30" }],
+  Mi: [{ id: 2810, time: "10:30" }, { id: 2811, time: "11:00" }],
+  Fr: [{ id: 2812, time: "10:45" }, { id: 2813, time: "11:15" }],
+  Sa: [{ id: 810, time: "08:00" }, { id: 811, time: "08:30" }, { id: 812, time: "12:00" }, { id: 813, time: "12:30" }],
+};
+const MASSAGE = (() => { const now = new Date(); return now >= NEUPLAN_MO_START ? MASSAGE_NOV : now >= AUG_START ? MASSAGE_AUG : now >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD; })();
+const getMassageForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= NEUPLAN_MO_START ? MASSAGE_NOV : d >= AUG_START ? MASSAGE_AUG : d >= MAI_START ? MASSAGE_NEW : MASSAGE_OLD;
 const MASSAGE_TYPES = ["Massage / Körperarbeit", "Personal Training", "Kinesiologisches Coaching", "Ernährungsberatung"];
 // SOS: Kursbasierte Zeiten ausschließen + freie Extraslots hinzufügen
 const SOS_EXCLUDE_OLD = {
@@ -371,10 +422,13 @@ const SOS_EXTRA_AUG = {
   Fr: [{ id: "aug-fr-sos-1", time: "08:45", label: "SOS-Termin Vormittag" }],
   Sa: [{ id: "aug-sa-sos-1", time: "10:45", label: "SOS-Termin Vormittag" }],
 };
+// Ab 10.11.2026: Montag 17:45 entfällt (Umbau fürs Langhanteltraining); ab 16.11. auch Montag 08:45 (Lillys Schicht)
+const SOS_EXTRA_NOV10 = { ...SOS_EXTRA_AUG, Mo: [{ id: "aug-mo-sos-1", time: "08:45", label: "SOS-Termin Vormittag" }] };
+const SOS_EXTRA_NOV16 = { ...SOS_EXTRA_NOV10, Mo: [] };
 const SOS_EXCLUDE = (() => { const now = new Date(); return now >= AUG_START ? SOS_EXCLUDE_AUG : now >= MAI_START ? SOS_EXCLUDE_NEW : SOS_EXCLUDE_OLD; })();
 const getSosExcludeForDate = (d) => d >= AUG_START ? SOS_EXCLUDE_AUG : d >= MAI_START ? SOS_EXCLUDE_NEW : SOS_EXCLUDE_OLD;
-const SOS_EXTRA = (() => { const now = new Date(); return now >= AUG_START ? SOS_EXTRA_AUG : now >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD; })();
-const getSosExtraForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= AUG_START ? SOS_EXTRA_AUG : d >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD;
+const SOS_EXTRA = (() => { const now = new Date(); return now >= NEUPLAN_MO_START ? SOS_EXTRA_NOV16 : now >= NEUPLAN_START ? SOS_EXTRA_NOV10 : now >= AUG_START ? SOS_EXTRA_AUG : now >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD; })();
+const getSosExtraForDate = (d) => istFeiertag(d) || istBehandlungspause(d) ? LEERER_PLAN : d >= NEUPLAN_MO_START ? SOS_EXTRA_NOV16 : d >= NEUPLAN_START ? SOS_EXTRA_NOV10 : d >= AUG_START ? SOS_EXTRA_AUG : d >= MAI_START ? SOS_EXTRA_NEW : SOS_EXTRA_OLD;
 // ─── OPEN GYM DYNAMISCH GENERIEREN ───
 const generateOpenGym = (schedule, massage) => {
   const result = {};
@@ -412,16 +466,28 @@ const OPEN_GYM_OLD = generateOpenGym(SCHEDULE_OLD, MASSAGE_OLD);
 const OPEN_GYM_NEW = generateOpenGym(SCHEDULE_NEW, MASSAGE_NEW);
 const OPEN_GYM_AUG = generateOpenGym(SCHEDULE_AUG, MASSAGE_AUG);
 const OPEN_GYM_OKT = generateOpenGym(SCHEDULE_OKT, MASSAGE_AUG);
-const OPEN_GYM_NOV = generateOpenGym(SCHEDULE_NOV, MASSAGE_AUG);
+const OPEN_GYM_NOV = generateOpenGym(mitGirlsClub(SCHEDULE_NOV), MASSAGE_AUG);
+const OPEN_GYM_NOV10 = generateOpenGym(mitGirlsClub(SCHEDULE_NOV10), MASSAGE_AUG);
+const OPEN_GYM_NOV16 = generateOpenGym(mitGirlsClub(SCHEDULE_NOV16), MASSAGE_NOV);
 // Feiertag: keine Kurse und Behandlungen, also alle Open-Gym-Stunden frei
 const OPEN_GYM_ALLE = generateOpenGym({}, {});
-const OPEN_GYM = (() => { const now = new Date(); return now >= GIRLS_CLUB_START ? OPEN_GYM_NOV : now >= LANGHANTEL_START ? OPEN_GYM_OKT : now >= AUG_START ? OPEN_GYM_AUG : now >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD; })();
+const OPEN_GYM = (() => { const now = new Date(); return now >= NEUPLAN_MO_START ? OPEN_GYM_NOV16 : now >= NEUPLAN_START ? OPEN_GYM_NOV10 : now >= GIRLS_CLUB_START ? OPEN_GYM_NOV : now >= LANGHANTEL_START ? OPEN_GYM_OKT : now >= AUG_START ? OPEN_GYM_AUG : now >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD; })();
 const OPEN_GYM_SONDER_CACHE = {};
 const getOpenGymForDate = (d) => {
   if (istFeiertag(d)) return OPEN_GYM_ALLE;
   const sp = sonderplanFuer(d);
-  if (sp) { const dk = dateKey(d); if (!OPEN_GYM_SONDER_CACHE[dk]) OPEN_GYM_SONDER_CACHE[dk] = generateOpenGym({ [DAYS_IDX[d.getDay()]]: sp.kurse }, {}); return OPEN_GYM_SONDER_CACHE[dk]; }
-  return d >= GIRLS_CLUB_START ? OPEN_GYM_NOV : d >= LANGHANTEL_START ? OPEN_GYM_OKT : d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
+  if (sp) {
+    const dk = dateKey(d);
+    if (!OPEN_GYM_SONDER_CACHE[dk]) {
+      const tag = DAYS_IDX[d.getDay()];
+      // Sondertag: Kurse des Sonderplans plus Girls-Club-Block (Samstag ab 14.11.) und die regulären Massagetermine des Tages
+      const kurse = tag === "Sa" && d >= GIRLS_CLUB_START ? [...sp.kurse, GIRLS_CLUB_BLOCK] : sp.kurse;
+      const massage = getMassageForDate(d)[tag] ? { [tag]: getMassageForDate(d)[tag] } : {};
+      OPEN_GYM_SONDER_CACHE[dk] = generateOpenGym({ [tag]: kurse }, massage);
+    }
+    return OPEN_GYM_SONDER_CACHE[dk];
+  }
+  return d >= NEUPLAN_MO_START ? OPEN_GYM_NOV16 : d >= NEUPLAN_START ? OPEN_GYM_NOV10 : d >= GIRLS_CLUB_START ? OPEN_GYM_NOV : d >= LANGHANTEL_START ? OPEN_GYM_OKT : d >= AUG_START ? OPEN_GYM_AUG : d >= MAI_START ? OPEN_GYM_NEW : OPEN_GYM_OLD;
 };
 // ─── LOGO (Echtes Amica Mea Logo) ───
 const AmicaLogo = ({ size = 64 }) => (
@@ -733,7 +799,7 @@ const AdminOnline = ({ members, onlineSet, onToggle }) => {
   </div>
   );
 };
-const Row = ({ time, label, sub, booked, full, count, max, onTap, isAdmin, onAdminTap, cancelled, subTrainer, color = C.orange, lightColor = C.orangeLight, icon }) => {
+const Row = ({ time, label, sub, booked, full, count, max, onTap, isAdmin, onAdminTap, cancelled, subTrainer, color = C.orange, lightColor = C.orangeLight, icon, waitPos = 0, waitCount = 0, onWait }) => {
   return (
     <div style={{ marginBottom: "2px" }}>
       <div style={{
@@ -758,12 +824,16 @@ const Row = ({ time, label, sub, booked, full, count, max, onTap, isAdmin, onAdm
             background: cancelled ? C.redSoft : count >= max ? C.redSoft : lightColor,
             color: cancelled ? C.red : count >= max ? C.red : color,
             border: "none", borderRadius: "5px", padding: "4px 8px", fontSize: "10px", fontWeight: 700, cursor: "pointer", fontFamily: FONT,
-          }}>{cancelled ? "⚙️" : `${count}/${max}`}</button>
+          }}>{cancelled ? "⚙️" : `${count}/${max}`}{!cancelled && waitCount > 0 && <span style={{ color: C.warmBrown }}> +{waitCount}</span>}</button>
         ) : (
           !cancelled && <>
             <span style={{ fontSize: "9px", color: full && !booked ? C.red : C.textLight, fontWeight: 600, minWidth: "20px", textAlign: "right" }}>{full && !booked ? "" : count < max && max > 1 ? `${max - count}` : ""}</span>
             {full && !booked ? (
-              <span style={{ padding: "4px 10px", borderRadius: "8px", background: C.redSoft, color: C.red, fontSize: "10px", fontWeight: 700, fontFamily: FONT }}>voll</span>
+              onWait && max > 1 ? (
+                <button onClick={(e) => { e.stopPropagation(); onWait(); }} style={{ padding: "4px 8px", borderRadius: "8px", border: "none", cursor: "pointer", background: waitPos ? C.warmBrown : "#F5EDE8", color: waitPos ? C.white : C.warmBrown, fontSize: "10px", fontWeight: 700, fontFamily: FONT, whiteSpace: "nowrap" }}>{waitPos ? `Warteliste ${waitPos}.` : "voll · Warteliste"}</button>
+              ) : (
+                <span style={{ padding: "4px 10px", borderRadius: "8px", background: C.redSoft, color: C.red, fontSize: "10px", fontWeight: 700, fontFamily: FONT }}>voll</span>
+              )
             ) : (
             <button onClick={(e) => { e.stopPropagation(); onTap?.(); }} style={{
               width: "32px", height: "32px", borderRadius: "8px", border: "none", cursor: full && !booked ? "default" : "pointer",
@@ -785,7 +855,7 @@ const DayHead = ({ day, di, color = C.orange }) => (
     <span style={{ fontSize: "13px", fontWeight: 700, color: C.white }}>{FULL_DAYS[di]}</span>
   </div>
 );
-const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onRestoreCourse, onRemoveBooking, onSubstitute, onMessage, cancelled, substitute, allMembers, readOnly }) => {
+const AdminSheet = ({ course, dayKey, bookings, waitlist = {}, onRemoveWait, onClose, onCancelCourse, onRestoreCourse, onRemoveBooking, onSubstitute, onMessage, cancelled, substitute, allMembers, readOnly }) => {
   const [mode, setMode] = useState(null);
   const [msgText, setMsgText] = useState("");
   const [sent, setSent] = useState(false);
@@ -793,6 +863,7 @@ const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onResto
   const bk = dayKey ? dayKey + "-" + course.id : String(course.id);
   const list = bookings[bk] || [];
   const ppl = list.map((mid) => (allMembers||[]).find((m) => m.id === mid)).filter(Boolean);
+  const wait = (waitlist[bk] || []).map((mid) => (allMembers||[]).find((m) => m.id === mid)).filter(Boolean);
   const isCx = cancelled.has(bk);
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.25)", backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 300, fontFamily: FONT }}>
@@ -825,7 +896,7 @@ const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onResto
                         const courseDate = bk.slice(0, 10);
                         const visitDays = new Set(Object.keys(bookings).filter(key => {
                           if (key.includes("-sos-") || key.includes("-probe-")) return false;
-                          const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+                          const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
                           if (massageIds.some(id => key.endsWith("-" + id))) return false;
                           if (key.slice(0, 10) > courseDate) return false;
                           return (bookings[key] || []).includes(p.id);
@@ -843,10 +914,24 @@ const AdminSheet = ({ course, dayKey, bookings, onClose, onCancelCourse, onResto
                     {p.goal && <div style={{ fontSize: "9px", color: C.teal }}>🎯 {p.goal}</div>}
                   </div>
                 </div>
-                <button onClick={() => onRemoveBooking(bk, p.id)} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Nicht da</button>
+                <button onClick={() => onRemoveBooking(bk, p.id, course.spots, course.name)} style={{ background: C.redSoft, color: C.red, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Nicht da</button>
               </div>
             )) : <p style={{ fontSize: "11px", color: C.textLight, fontStyle: "italic" }}>Keine Anmeldungen</p>}
           </div>
+          {wait.length > 0 && (
+            <div style={{ marginBottom: "12px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, color: C.warmBrown, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: "5px" }}>Warteliste ({wait.length})</div>
+              {wait.map((p, idx) => (
+                <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.borderLight}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 700, color: C.warmBrown, minWidth: "16px" }}>{idx + 1}.</span>
+                    <span style={{ fontSize: "12px", fontWeight: 500, color: C.text }}>{p.name}</span>
+                  </div>
+                  {!readOnly && onRemoveWait && <button onClick={() => onRemoveWait(bk, p.id)} style={{ background: "#F5EDE8", color: C.warmBrown, border: "none", borderRadius: "5px", padding: "3px 8px", fontSize: "10px", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Streichen</button>}
+                </div>
+              ))}
+            </div>
+          )}
           {/* Profil-Popup */}
           {selectedMember && (
             <div onClick={() => setSelectedMember(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 600, padding: "16px" }}>
@@ -935,6 +1020,22 @@ const ConfirmDialog = ({ text, onConfirm, onCancel }) => (
     </div>
   </div>
 );
+// Wochennavigation (oben und unten unter jeder Wochenliste)
+const WeekNav = ({ offset, setOffset, max, label, bg, fg, bottom }) => {
+  const go = (n) => { setOffset(n); if (bottom) window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const canPrev = offset > 0, canNext = offset < max;
+  const btn = (on) => ({ background: on ? bg : C.pageBg, color: on ? fg : C.textLight, border: "none", borderRadius: "7px", padding: "5px 9px", fontSize: "10px", fontWeight: 600, cursor: on ? "pointer" : "default", fontFamily: FONT, opacity: on ? 1 : 0.3, whiteSpace: "nowrap" });
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: bottom ? "4px" : "6px", marginTop: bottom ? "10px" : 0 }}>
+      <button onClick={() => { if (canPrev) go(offset - 1); }} style={btn(canPrev)}>{canPrev ? "‹ vorherige Woche" : ""}</button>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: C.darkBrown }}>{label}</div>
+        {offset !== 0 && <button onClick={() => go(0)} style={{ background: "none", border: "none", fontSize: "9px", color: fg, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Heute</button>}
+      </div>
+      <button onClick={() => { if (canNext) go(offset + 1); }} style={btn(canNext)}>{canNext ? "nächste Woche ›" : ""}</button>
+    </div>
+  );
+};
 const Popup = ({ text, type, onClose }) => {
   useEffect(() => { const t = setTimeout(onClose, 1500); return () => clearTimeout(t); }, []);
   return (
@@ -1323,6 +1424,7 @@ function App() {
   const [user, setUser] = useState(() => { try { const s = localStorage.getItem("amicamea_user"); return s ? JSON.parse(s) : null; } catch(e) { return null; } });
   const [allMembers, setAllMembers] = useState([]);
   const [bookings, setBookings] = useState({});
+  const [waitlist, setWaitlist] = useState({}); // booking_key -> [member_id] in Reihenfolge der Eintragung
   const [massageTypes, setMassageTypes] = useState({});
   const [bookingNotes, setBookingNotes] = useState({});
   const [cancelled, setCancelled] = useState(new Set());
@@ -1385,9 +1487,26 @@ function App() {
   // ─── DATEN AUS SUPABASE LADEN ───
   const loadData = useCallback(async () => {
     try {
-      let [membersData, bookingsData, cancelledData, subsData, notesData] = await Promise.all([
+      let [membersData, bookingsData, cancelledData, subsData, notesData, waitData] = await Promise.all([
         dbGet("members"), dbGet("bookings", "&booking_key=gte." + dateKey(new Date(Date.now() - 14 * 86400000))), dbGet("cancelled_courses"), dbGet("substitutes"), dbGet("admin_notes"),
+        dbGet("waitlist", "&booking_key=gte." + dateKey(new Date(Date.now() - 60 * 86400000)) + "&order=created_at.asc"),
       ]);
+      if (waitData && user?.isAdmin) { const alt60 = dateKey(new Date(Date.now() - 60 * 86400000)); dbDelete("waitlist", `booking_key=lt.${encodeURIComponent(alt60)}`); }
+      if (waitData) { const wMap = {}; waitData.forEach(w => { if (!wMap[w.booking_key]) wMap[w.booking_key] = []; wMap[w.booking_key].push(w.member_id); }); setWaitlist(wMap); }
+      // Nachgerückt? Hinweis für die Kundin beim nächsten Öffnen
+      if (user && !user.isAdmin) {
+        try {
+          const seen = localStorage.getItem("am_nachgerueckt_seen") || "2000-01-01";
+          const r = await fetch(sb("activity_log") + `?select=details,created_at,action&action=in.(nachgerueckt,warteliste_absage)&member_id=eq.${encodeURIComponent(user.id)}&created_at=gt.${encodeURIComponent(seen)}&order=created_at.asc`, { headers: H });
+          if (r.ok) { const rows = await r.json(); if (rows.length) {
+            localStorage.setItem("am_nachgerueckt_seen", rows[rows.length - 1].created_at);
+            const nach = rows.filter(x => x.action === "nachgerueckt").map(x => x.details.replace(/ nachgerückt$/, ""));
+            const abs = rows.filter(x => x.action === "warteliste_absage").map(x => x.details.replace(/ abgesagt$/, ""));
+            const txt = [nach.length ? "Du bist nachgerückt: " + nach.join(", ") : "", abs.length ? "Abgesagt, Warteliste aufgelöst: " + abs.join(", ") : ""].filter(Boolean).join(" · ");
+            setPopup({ text: txt, type: nach.length ? "booked" : "cancel" });
+          } }
+        } catch(e) {}
+      }
       if (notesData && !editingNotes.current) { const nMap = {}; notesData.forEach(n => { nMap[n.date_key] = n.note; }); setAdminNotes(nMap); }
       // Abgelaufene Gastkonten 30 Tage nach trial_expires automatisch loeschen (nur Admin, Marketing-Backup vorher)
       if (membersData && user?.isAdmin) {
@@ -1443,7 +1562,7 @@ function App() {
     // Zähle echte Kursbuchungen (keine Massage, SOS, Express)
     const visitCount = Object.keys(bookings).filter(key => {
       if (key.includes("-sos-") || key.includes("-probe-")) return false;
-      const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+      const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
       if (massageIds.some(id => key.endsWith("-" + id))) return false;
       return (bookings[key] || []).includes(user.id);
     }).length;
@@ -1591,6 +1710,50 @@ function App() {
     const day = ["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()];
     return ` (${day}, ${d.getDate()}.${d.getMonth()+1}.)`;
   };
+  // Warteliste: Nachrücken, wenn ein Platz frei wird
+  const promoteFromWaitlist = async (bk, max, label) => {
+    try {
+      const [wr, br] = await Promise.all([
+        fetch(sb("waitlist") + `?booking_key=eq.${encodeURIComponent(bk)}&select=member_id,created_at&order=created_at.asc`, { headers: H }),
+        fetch(sb("bookings") + `?booking_key=eq.${encodeURIComponent(bk)}&select=member_id`, { headers: H }),
+      ]);
+      if (!wr.ok || !br.ok) return;
+      const waiting = await wr.json(); const booked = (await br.json()).map(b => b.member_id);
+      const dl = bkDateLabel(bk);
+      const kd = new Date(bk.slice(0, 10) + "T12:00:00");
+      const kc = (getScheduleForDate(kd)[DAYS_IDX[kd.getDay()]] || []).find(x => String(x.id) === bk.split("-")[3]);
+      const kursKey = kc ? `${FULL_DAYS_IDX[kd.getDay()]} ${kc.time} ${kc.name}` : label;
+      for (const w of waiting) {
+        if (booked.length >= max) break;
+        if (booked.includes(w.member_id)) { await dbDelete("waitlist", `booking_key=eq.${encodeURIComponent(bk)}&member_id=eq.${encodeURIComponent(w.member_id)}`); continue; }
+        const ins = await dbInsert("bookings", { booking_key: bk, member_id: w.member_id });
+        if (ins === null) break;
+        await dbDelete("waitlist", `booking_key=eq.${encodeURIComponent(bk)}&member_id=eq.${encodeURIComponent(w.member_id)}`);
+        booked.push(w.member_id);
+        const m = allMembers.find(x => x.id === w.member_id);
+        logActivity("nachgerueckt", `${kursKey}${dl} nachgerückt`, m?.name || "", w.member_id);
+      }
+      setBookings(p => ({ ...p, [bk]: booked }));
+      setWaitlist(p => ({ ...p, [bk]: waiting.map(w => w.member_id).filter(id => !booked.includes(id)) }));
+    } catch(e) {}
+  };
+  const toggleWaitlist = async (bk, label) => {
+    if (!user || isAdmin) return;
+    const cur = waitlist[bk] || [];
+    const dl = bkDateLabel(bk);
+    if (cur.includes(user.id)) {
+      await dbDelete("waitlist", `booking_key=eq.${encodeURIComponent(bk)}&member_id=eq.${encodeURIComponent(user.id)}`);
+      setWaitlist(p => ({ ...p, [bk]: cur.filter(x => x !== user.id) }));
+      setPopup({ text: "Von der Warteliste gestrichen", type: "cancel" });
+      logActivity("warteliste_raus", `${label}${dl}: von der Warteliste gestrichen`, user.name, user.id);
+    } else {
+      const r = await dbInsert("waitlist", { booking_key: bk, member_id: user.id });
+      if (r === null) { setPopup({ text: "Das hat nicht geklappt. Bitte nochmal versuchen.", type: "cancel" }); return; }
+      setWaitlist(p => ({ ...p, [bk]: [...cur, user.id] }));
+      setPopup({ text: `Auf der Warteliste, Platz ${cur.length + 1}. Wird ein Platz frei, bist du automatisch gebucht.`, type: "booked" });
+      logActivity("warteliste", `${label}${dl}: auf die Warteliste (Platz ${cur.length + 1})`, user.name, user.id);
+    }
+  };
   const book = async (bk, max, label) => {
     if (!user || isAdmin) return;
     if (cancelled.has(bk)) return;
@@ -1619,12 +1782,27 @@ function App() {
             setBookings((p) => ({ ...p, [bk]: cur.filter((x) => x !== user.id) }));
             setPopup({ text: `${label} abgesagt`, type: "cancel" });
             logActivity("stornierung", `${label} storniert${dl}`, user.name, user.id);
+            if ((waitlist[bk] || []).length) promoteFromWaitlist(bk, max, label);
           },
           onCancel: () => setConfirmDialog(null),
         });
       }, 50);
     } else {
-      if (cur.length >= max) return;
+      if (cur.length >= max) { if (max > 1) toggleWaitlist(bk, label); return; }
+      // Kurse: vor dem Buchen in der Datenbank nachzählen (zwei Frauen, ein letzter Platz)
+      if (max > 1) {
+        try {
+          const check = await fetch(sb("bookings") + `?booking_key=eq.${encodeURIComponent(bk)}&select=member_id`, { headers: H });
+          if (check.ok) {
+            const existing = (await check.json()).map(e => e.member_id);
+            if (!existing.includes(user.id) && existing.length >= max) {
+              setBookings((p) => ({ ...p, [bk]: existing }));
+              setPopup({ text: "Der letzte Platz ist gerade weg. Du kannst dich auf die Warteliste setzen.", type: "cancel" });
+              return;
+            }
+          }
+        } catch(e) { /* bei Netzwerkfehler trotzdem versuchen */ }
+      }
       // Bei Einzelplatz-Buchungen (SOS, etc.): DB-Check gegen Race Conditions
       if (max === 1) {
         try {
@@ -1668,9 +1846,10 @@ function App() {
     setPopup({ text: `${type} gebucht!`, type: "booked" });
     logActivity("buchung_massage", `${type} gebucht${bkDateLabel(bk)}${note ? ` · Mitteilung: ${note}` : ""}`, user.name, user.id);
   };
-  const removeBooking = async (cid, mid) => {
+  const removeBooking = async (cid, mid, max, label) => {
     await dbDelete("bookings", `booking_key=eq.${encodeURIComponent(cid)}&member_id=eq.${encodeURIComponent(mid)}`);
     setBookings((p) => ({ ...p, [cid]: (p[cid] || []).filter((x) => x !== mid) }));
+    if (max && (waitlist[cid] || []).length) promoteFromWaitlist(cid, max, label || "Kurs");
     const m = allMembers.find((x) => x.id === mid);
     setPopup({ text: `${m?.name} als nicht da markiert`, type: "cancel" });
     // Kursteilnehmerin austragen bedeutet immer: war nicht da.
@@ -1682,6 +1861,16 @@ function App() {
     if (result === null) {
       setPopup({ text: "Fehler beim Absagen! Bitte nochmal versuchen.", type: "cancel" });
       return;
+    }
+    // Warteliste des Kurses auflösen, Wartende bekommen beim nächsten Öffnen den Hinweis
+    const waiting = waitlist[id] || [];
+    if (waiting.length) {
+      const kd = new Date(id.slice(0, 10) + "T12:00:00");
+      const kc = (getScheduleForDate(kd)[DAYS_IDX[kd.getDay()]] || []).find(x => String(x.id) === id.split("-")[3]);
+      const kursKey = kc ? `${FULL_DAYS_IDX[kd.getDay()]} ${kc.time} ${kc.name}` : id;
+      for (const mid of waiting) { const m = allMembers.find(x => x.id === mid); logActivity("warteliste_absage", `${kursKey}${bkDateLabel(id)} abgesagt`, m?.name || "", mid); }
+      await dbDelete("waitlist", `booking_key=eq.${encodeURIComponent(id)}`);
+      setWaitlist(p => ({ ...p, [id]: [] }));
     }
     setCancelled((p) => new Set([...p, id])); setPopup({ text: "Kurs abgesagt", type: "cancel" });
     logActivity("kurs_abgesagt", `Kurs abgesagt: ${id}`, user.name, user.id);
@@ -1707,9 +1896,10 @@ function App() {
     Object.values(SCHEDULE_OLD).flat().filter(c => c.type === "express").forEach(c => expressIds.add(String(c.id)));
     Object.values(SCHEDULE_NEW).flat().filter(c => c.type === "express").forEach(c => expressIds.add(String(c.id)));
     Object.values(SCHEDULE_AUG).flat().filter(c => c.type === "express").forEach(c => expressIds.add(String(c.id)));
+    Object.values(SCHEDULE_NOV16).flat().filter(c => c.type === "express").forEach(c => expressIds.add(String(c.id)));
     Object.keys(bookings).forEach((key) => {
       if (key.includes("-sos-") || key.includes("-probe-")) return;
-      const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+      const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
       if (massageIds.some(id => key.endsWith("-" + id))) return;
       const courseId = key.split("-").pop();
       if (expressIds.has(courseId)) return;
@@ -1864,14 +2054,7 @@ function App() {
           <div style={{ marginBottom: "6px" }}>
             <button onClick={() => setShowKursinfo(true)} style={{ background: C.orange, border: "none", borderRadius: "8px", padding: "6px 12px", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", fontSize: "11px", fontWeight: 700, color: C.white, fontFamily: FONT, letterSpacing: "0.3px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>📋 Kursbeschreibung</button>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-            <button onClick={() => { if (weekOffset > 0) setWeekOffset(weekOffset - 1); }} style={{ background: weekOffset > 0 ? C.orangeLight : C.pageBg, color: weekOffset > 0 ? C.orange : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: weekOffset > 0 ? "pointer" : "default", fontFamily: FONT, opacity: weekOffset > 0 ? 1 : 0.3 }}>{weekOffset > 0 ? "‹ vorher" : ""}</button>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: C.darkBrown }}>{calWeekLabel}</div>
-              {weekOffset !== 0 && <button onClick={() => setWeekOffset(0)} style={{ background: "none", border: "none", fontSize: "9px", color: C.orange, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Heute</button>}
-            </div>
-            <button onClick={() => { if (weekOffset < 3) setWeekOffset(weekOffset + 1); }} style={{ background: weekOffset < 3 ? C.orangeLight : C.pageBg, color: weekOffset < 3 ? C.orange : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: weekOffset < 3 ? "pointer" : "default", fontFamily: FONT }}>nächste ›</button>
-          </div>
+          <WeekNav offset={weekOffset} setOffset={setWeekOffset} max={3} label={calWeekLabel} bg={C.orangeLight} fg={C.orange} />
           {calDates.map((date, di) => {
             const dayKey = DAYS_IDX[date.getDay()];
             const courses = getScheduleForDate(date)[dayKey] || [];
@@ -1900,12 +2083,14 @@ function App() {
                   return <Row key={c.id} time={c.time} label={c.mama ? c.name + " 👶" : c.name}
                     sub={substitute[bk] ? "Vertretung: " + substitute[bk] : (() => { const matteKurse = ["In Balance", "Pilates", "Mindful Yoga", "Vinyasa Yoga"]; if (c.type === "zirkel") return "Zirkeltraining mit " + c.trainer; if (c.type === "express") return c.dur + " Minuten mit " + c.trainer; if (matteKurse.includes(c.name)) return "Training auf der Matte mit " + c.trainer; return "Freies Training mit " + c.trainer; })()}
                     booked={booked} full={list.length >= c.spots} count={list.length} max={c.spots}
+                    waitPos={(waitlist[bk] || []).indexOf(user?.id) + 1} waitCount={(waitlist[bk] || []).length} onWait={() => { if (!isTrainer) toggleWaitlist(bk, c.name); }}
                     onTap={() => { if (!isTrainer) book(bk, c.spots, c.name); }} isAdmin={isAdmin || isTrainer} onAdminTap={() => setAdminSheet({ course: c, dayKey: dk, readOnly: isTrainer })}
                     cancelled={cancelled.has(bk)} subTrainer={substitute[bk]} />;
                 })}
               </div>
             );
           })}
+          <WeekNav bottom offset={weekOffset} setOffset={setWeekOffset} max={3} label={calWeekLabel} bg={C.orangeLight} fg={C.orange} />
         </div>
       )}
       {/* ─── KÖRPERARBEIT ─── */}
@@ -1927,14 +2112,7 @@ function App() {
             const massageDates = getDays(massageWeekOffset);
             const massageWeekLabel = fmtDate(massageDates[0]) + " – " + fmtDate(massageDates[6]);
             return (<>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-              <button onClick={() => { if (massageWeekOffset > 0) setMassageWeekOffset(massageWeekOffset - 1); }} style={{ background: massageWeekOffset > 0 ? C.tealLight : C.pageBg, color: massageWeekOffset > 0 ? C.teal : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: massageWeekOffset > 0 ? "pointer" : "default", fontFamily: FONT, opacity: massageWeekOffset > 0 ? 1 : 0.3 }}>{massageWeekOffset > 0 ? "‹ vorher" : ""}</button>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: C.darkBrown }}>{massageWeekLabel}</div>
-                {massageWeekOffset !== 0 && <button onClick={() => setMassageWeekOffset(0)} style={{ background: "none", border: "none", fontSize: "9px", color: C.teal, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Heute</button>}
-              </div>
-              <button onClick={() => { if (massageWeekOffset < 3) setMassageWeekOffset(massageWeekOffset + 1); }} style={{ background: massageWeekOffset < 3 ? C.tealLight : C.pageBg, color: massageWeekOffset < 3 ? C.teal : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: massageWeekOffset < 3 ? "pointer" : "default", fontFamily: FONT }}>nächste ›</button>
-            </div>
+            <WeekNav offset={massageWeekOffset} setOffset={setMassageWeekOffset} max={3} label={massageWeekLabel} bg={C.tealLight} fg={C.teal} />
             {massageDates.map((date, di) => {
               const dayKey = DAYS_IDX[date.getDay()];
               const massageSlots = getMassageForDate(date)[dayKey] || [];
@@ -2143,6 +2321,7 @@ function App() {
                 </div>
               );
             })}
+            <WeekNav bottom offset={massageWeekOffset} setOffset={setMassageWeekOffset} max={3} label={massageWeekLabel} bg={C.tealLight} fg={C.teal} />
             </>);
           })()}
           {/* Alle Probetraining-Buchungen entfernt — Gast-System übernimmt */}
@@ -2173,14 +2352,7 @@ function App() {
             const gymDates = getDays(gymWeekOffset);
             const gymWeekLabel = fmtDate(gymDates[0]) + " – " + fmtDate(gymDates[6]);
             return (<>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-              <button onClick={() => { if (gymWeekOffset > 0) setGymWeekOffset(gymWeekOffset - 1); }} style={{ background: gymWeekOffset > 0 ? "#F5EDE8" : C.pageBg, color: gymWeekOffset > 0 ? C.warmBrown : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: gymWeekOffset > 0 ? "pointer" : "default", fontFamily: FONT, opacity: gymWeekOffset > 0 ? 1 : 0.3 }}>{gymWeekOffset > 0 ? "‹ vorher" : ""}</button>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: C.darkBrown }}>{gymWeekLabel}</div>
-                {gymWeekOffset !== 0 && <button onClick={() => setGymWeekOffset(0)} style={{ background: "none", border: "none", fontSize: "9px", color: C.warmBrown, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>Heute</button>}
-              </div>
-              <button onClick={() => { if (gymWeekOffset < 2) setGymWeekOffset(gymWeekOffset + 1); }} style={{ background: gymWeekOffset < 2 ? "#F5EDE8" : C.pageBg, color: gymWeekOffset < 2 ? C.warmBrown : C.textLight, border: "none", borderRadius: "7px", padding: "5px 10px", fontSize: "11px", fontWeight: 600, cursor: gymWeekOffset < 2 ? "pointer" : "default", fontFamily: FONT }}>nächste ›</button>
-            </div>
+            <WeekNav offset={gymWeekOffset} setOffset={setGymWeekOffset} max={2} label={gymWeekLabel} bg="#F5EDE8" fg={C.warmBrown} />
             {gymDates.map((date, di) => {
               const dayKey = DAYS_IDX[date.getDay()];
               const dk = dateKey(date);
@@ -2245,6 +2417,7 @@ function App() {
                 </div>
               );
             })}
+            <WeekNav bottom offset={gymWeekOffset} setOffset={setGymWeekOffset} max={2} label={gymWeekLabel} bg="#F5EDE8" fg={C.warmBrown} />
             </>);
           })()}
           </>)}
@@ -2288,7 +2461,7 @@ function App() {
               if (daysSinceReg >= 2 && daysSinceReg <= 7) {
                 const hasBooking = Object.keys(bookings).some(key => {
                   if (key.includes("-sos-") || key.includes("-probe-")) return false;
-                  const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+                  const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
                   if (massageIds.some(id => key.endsWith("-" + id))) return false;
                   return (bookings[key] || []).includes(m.id);
                 });
@@ -2404,7 +2577,7 @@ function App() {
               });
               // Erstbesuche als Items einfügen (nur Admin)
               if (isAdmin) {
-                const massageIdsAll = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+                const massageIdsAll = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
                 (getScheduleForDate(d)[dayName] || []).forEach((c) => {
                   const bkc = dk + "-" + c.id;
                   if (cancelled.has(bkc)) return;
@@ -2643,6 +2816,36 @@ function App() {
                   </div>
                 ))}
               </div>
+              {/* Warteliste: Nachfrage über die Plätze hinaus */}
+              {(() => {
+                const heute = dateKey(new Date());
+                const perKurs = {};
+                const add = (bk, field) => {
+                  const cid = bk.split("-")[3]; const d = new Date(bk.slice(0, 10) + "T12:00:00");
+                  const c = (getScheduleForDate(d)[DAYS_IDX[d.getDay()]] || []).find(x => String(x.id) === cid);
+                  const key = c ? `${FULL_DAYS_IDX[d.getDay()]} ${c.time} ${c.name}` : bk;
+                  if (!perKurs[key]) perKurs[key] = { offen: 0, leer: 0, nach: 0 };
+                  perKurs[key][field]++;
+                };
+                Object.entries(waitlist).forEach(([bk, ids]) => ids.forEach(() => add(bk, bk.slice(0, 10) >= heute ? "offen" : "leer")));
+                activityLog.filter(l => l.action === "nachgerueckt" && new Date(l.created_at) >= cutoff).forEach(l => {
+                  const key = l.details.split(" (")[0]; if (!perKurs[key]) perKurs[key] = { offen: 0, leer: 0, nach: 0 }; perKurs[key].nach++;
+                });
+                const rows = Object.entries(perKurs);
+                if (!rows.length) return null;
+                return (
+                  <div style={{ background: "#F5EDE8", borderRadius: "8px", padding: "8px 10px", marginBottom: "10px", border: `1px solid ${C.border}` }}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: C.warmBrown, textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: "4px" }}>Warteliste</div>
+                    {rows.map(([k, v]) => (
+                      <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: C.text, padding: "2px 0" }}>
+                        <span>{k}</span>
+                        <span style={{ color: C.textMid, whiteSpace: "nowrap" }}>{v.offen} wartend · {v.nach} nachgerückt · {v.leer} leer ausgegangen</span>
+                      </div>
+                    ))}
+                    <div style={{ fontSize: "9px", color: C.textLight, marginTop: "4px" }}>Wartend: kommende Termine. Leer ausgegangen: Termin vorbei, kein Platz frei geworden. Nachgerückt: im gewählten Zeitraum.</div>
+                  </div>
+                );
+              })()}
               {/* Log-Einträge */}
               {filtered.length === 0 && (
                 <div style={{ textAlign: "center", padding: "28px" }}>
@@ -2748,7 +2951,7 @@ function App() {
                         const todayStr = t.getFullYear() + "-" + String(t.getMonth()+1).padStart(2,"0") + "-" + String(t.getDate()).padStart(2,"0");
                         const visitDays = new Set(Object.keys(bookings).filter(key => {
                           if (key.includes("-sos-") || key.includes("-probe-")) return false;
-                          const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat()].map(s => s.id);
+                          const massageIds = [...Object.values(MASSAGE_OLD).flat(), ...Object.values(MASSAGE_NEW).flat(), ...Object.values(MASSAGE_AUG).flat(), ...Object.values(MASSAGE_NOV).flat()].map(s => s.id);
                           if (massageIds.some(id => key.endsWith("-" + id))) return false;
                           if (key.slice(0, 10) > todayStr) return false;
                           return (bookings[key] || []).includes(m.id);
@@ -3013,7 +3216,7 @@ function App() {
       {trialRestart && <TrialRestartDialog member={trialRestart} onCancel={() => setTrialRestart(null)} onConfirm={async (d) => { const mm = trialRestart; setTrialRestart(null); await restartTrial(mm.id, d); setPopup({ text: `Probewoche für ${mm.name} neu gestartet`, type: "booked" }); }} />}
       {pickingMassage && <TypePicker onPick={(type, note) => { bookMassage(pickingMassage.id, pickingMassage.dk, type, note); setPickingMassage(null); }} onCancel={() => setPickingMassage(null)} />}
       {confirmDialog && <ConfirmDialog text={confirmDialog.text} onConfirm={confirmDialog.onConfirm} onCancel={confirmDialog.onCancel} />}
-      {adminSheet && <AdminSheet course={adminSheet.course || adminSheet} dayKey={adminSheet.dayKey} bookings={bookings} cancelled={cancelled} substitute={substitute}
+      {adminSheet && <AdminSheet course={adminSheet.course || adminSheet} dayKey={adminSheet.dayKey} bookings={bookings} waitlist={waitlist} onRemoveWait={async (bk, mid) => { await dbDelete("waitlist", `booking_key=eq.${encodeURIComponent(bk)}&member_id=eq.${encodeURIComponent(mid)}`); setWaitlist(p => ({ ...p, [bk]: (p[bk] || []).filter(x => x !== mid) })); }} cancelled={cancelled} substitute={substitute}
         onClose={() => setAdminSheet(null)} onCancelCourse={cancelCourse} onRestoreCourse={restoreCourse}
         onRemoveBooking={removeBooking} onSubstitute={setSub} onMessage={sendMsg} allMembers={allMembers} readOnly={adminSheet.readOnly || false} />}
       {/* ─── KURSINFO OVERLAY ─── */}
@@ -3025,6 +3228,7 @@ function App() {
               <button onClick={() => setShowKursinfo(false)} style={{ background: C.pageBg, border: "none", borderRadius: "50%", width: 30, height: 30, fontSize: "14px", cursor: "pointer", color: C.textLight, fontWeight: 700 }}>✕</button>
             </div>
             <div style={{ padding: "12px 16px 24px" }}>
+              <div style={{ fontSize: "11px", color: C.textMid, lineHeight: 1.5, marginBottom: "12px", padding: "8px 10px", background: "#F5EDE8", borderRadius: "8px" }}>Kurs voll? Tipp auf „Warteliste“. Wird ein Platz frei, bist du automatisch gebucht und siehst es in „Meine Woche“.</div>
               <div style={{ fontSize: "11px", fontWeight: 600, color: C.orange, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Zirkeltraining</div>
               {[
                 { emoji: "🚀", name: "Boost it!", desc: "Dein Cardio-Kick. Schwitzen, Energie tanken, Kopf frei kriegen." },
@@ -3047,7 +3251,7 @@ function App() {
                 <span style={{ fontSize: "20px", minWidth: "28px", textAlign: "center" }}>✨</span>
                 <div>
                   <div style={{ fontSize: "13px", fontWeight: 700, color: C.darkBrown }}>Girls Club</div>
-                  <div style={{ fontSize: "11px", color: C.textMid, lineHeight: 1.4, marginTop: "1px" }}>Nur für Mädchen von 11 bis 15. Ein ausgewogenes Krafttraining an hydraulischen Geräten, kombiniert mit Pilates und Akrobatik. Das schult Aufrichtung, Körpergefühl und Koordination, ähnlich wie Turnen oder Ballett. Altersgerecht angeleitet von Lilly. Samstags um 13 Uhr, 60 Minuten, auch in der Ferienzeit.</div>
+                  <div style={{ fontSize: "11px", color: C.textMid, lineHeight: 1.4, marginTop: "1px" }}>Nur für Mädchen von 11 bis 15. Ein ausgewogenes Krafttraining an hydraulischen Geräten, kombiniert mit Pilates und Akrobatik. Das schult Aufrichtung, Körpergefühl und Koordination, ähnlich wie Turnen oder Ballett. Altersgerecht angeleitet von Lilly. Samstags um 13 Uhr, 60 Minuten, auch in der Ferienzeit. Anmeldung direkt bei Eva, nicht über die App.</div>
                 </div>
               </div>
               <div style={{ fontSize: "11px", fontWeight: 600, color: C.orange, textTransform: "uppercase", letterSpacing: "1.5px", marginTop: "16px", marginBottom: "8px" }}>Amica Mea Online</div>
